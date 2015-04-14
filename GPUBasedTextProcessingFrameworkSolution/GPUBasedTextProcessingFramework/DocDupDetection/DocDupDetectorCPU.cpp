@@ -5,6 +5,7 @@
 #include <string>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <vector>
 #include <list>
 #include <map>
@@ -105,7 +106,7 @@ char* DocDupDetectorCPU::spamsum(const uchar *in, int length, int flags, u32 bsi
 		count++;
 		if(count>1)
 			block_size=block_size/2;
-		_snprintf(ret, 12, "%u:", block_size);  //12可以放大
+		snprintf(ret, 12, "%u:", block_size);  //12可以放大
 		//printf("%s\n",ret);
 		//p=(char*)malloc(SPAMSUM_LENGTH+1);
 		p=ret+strlen(ret);
@@ -200,7 +201,7 @@ void DocDupDetectorCPU::add_document(string doc){
 
 void DocDupDetectorCPU::calculate_dups(){
 	clock_t tt = clock();
-	LOG(logger, "Begin calculate candidate dups");
+	LOG(logger, "%s", "Begin calculate candidate dups");
 	map<int,string>::iterator iter,next;
 	for(iter=M.begin();iter!=M.end();iter++){
 		const char* source_hash=(iter->second).c_str();

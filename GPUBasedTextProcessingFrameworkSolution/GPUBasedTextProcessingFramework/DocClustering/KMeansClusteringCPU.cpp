@@ -199,7 +199,7 @@ static void initializeCentroids(DataPoint *centroids, DataPoint *X, vector<int> 
 void KMeansClusteringCPU::run_clustering(int k) {
 	clock_t ttt = clock();
 
-	LOG(logger, "KMeansClusteringCPU run_clustering");
+	LOG(logger, "%s", "KMeansClusteringCPU run_clustering");
 	
 	assert(document_counter > 0);
 	g_indices = new int[document_counter];
@@ -210,10 +210,10 @@ void KMeansClusteringCPU::run_clustering(int k) {
 
 	// TODO: or use other initialization methmod
 	if(init_ids.size() == k) {
-		LOG(logger, "kmeans initialize with init_ids");
+		LOG(logger, "%s", "kmeans initialize with init_ids");
 		initializeCentroids(g_centroids, g_document_vectors, init_ids);
 	} else {
-		LOG(logger, "kmeans initialize with random values");
+		LOG(logger, "%s", "kmeans initialize with random values");
 		randomlyInitializeCentroids(g_centroids, g_document_vectors, k);
 	}
 

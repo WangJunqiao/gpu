@@ -49,11 +49,11 @@ void KMeansClusteringGPU::random_pick(int k, int dimensions) {
 	set<int> st;
 	
 	if(init_ids.size() == k) {
-		LOG(logger, "kmeans initialize with init_ids");
+		LOG(logger, "%s", "kmeans initialize with init_ids");
 		st = set<int>(init_ids.begin(), init_ids.end());
 		assert(st.size() == k);
 	} else {
-		LOG(logger, "kmeans initialize with random values");
+		LOG(logger, "%s", "kmeans initialize with random values");
 		while((int)st.size() < k) {
 			int x = rand() % doc_num;
 			st.insert(x);
@@ -252,7 +252,7 @@ void KMeansClusteringGPU::run_clustering(int k) {
 
 	for(int iter = 1;;iter++) {
 		safeCudaCall(cudaMemset(dev_dis, 0, sizeof(float) * (doc_num * k)));
-		LOG(logger, "begin cuda call\n");
+		LOG(logger, "%s", "begin cuda call\n");
 		int t = clock();
 		//calcAllDisByGpu<32, 256> <<<4096, 32>>>(dev_darr, dev_karr, doc_num, k, dimensions, dev_dis);
 		calcAllDisByGpu2<128> <<<block_num, 128>>>(dev_darr, dev_karr, doc_num, k, dimensions, dev_dis);

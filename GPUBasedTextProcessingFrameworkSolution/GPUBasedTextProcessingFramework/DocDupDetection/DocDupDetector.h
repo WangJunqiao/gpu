@@ -20,6 +20,7 @@
 #define DOCDUPDETECTOR_H
 
 #include <vector>
+#include <string>
 #include <time.h>
 using namespace std;
 

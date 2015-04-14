@@ -95,9 +95,7 @@ static HashMapSI word_id;
 
 
 
-//找出有意义的单词，在corpus文件中出现的次数不少于MIN_OCCURENCE次
-void WordSimCalculator::find_top_words(DocumentSource *doc_src) {
-	LOG(logger, "Finding top ranked(top %d) words...", this->top_words_num);
+
 	HashMapSI counter;
 
 	doc_src->openSource();
@@ -136,9 +134,7 @@ void WordSimCalculator::calc_mutual_info_matrix(DocumentSource *doc_src, int win
 	int W = word_id.size();
 	LOG(logger, "find top words, time used = %f s", (clock()-t)/(double)CLOCKS_PER_SEC);
 
-	//cnt_map[i]记录第i个字符串跟那些字符串成对出现过，并统计次数
-	vector<HashMapII*> cnt_map;
-	//co_oc[i]表示第cnt_map[i]中所有pair的second总和
+
 	vector<long long> co_oc;
 	for(int i=0;i<word_id.size();i++) {
 		cnt_map.push_back(new unordered_map<int, int, hash<int> >()); //freed
@@ -217,9 +213,7 @@ void WordSimCalculator::calc_mutual_info_matrix(DocumentSource *doc_src, int win
 			val -= log((double)co_oc[it->first]);
 
 			if(val <= 0) {
-				continue; //只考虑大于0的
-				LOG(logger, "bad case");
-			}
+
 			max_val = max(max_val, val);
 
 			num ++;
@@ -303,5 +297,5 @@ void WordSimCalculator::rebuild_triples(int order1, int order2) {
 	for(int i=0;i<sims.size();i++) {
 		delete sims[i];
 	}
-	LOG(logger, "rebuild successfully");
+	LOG(logger, "%s", "rebuild successfully");
 }

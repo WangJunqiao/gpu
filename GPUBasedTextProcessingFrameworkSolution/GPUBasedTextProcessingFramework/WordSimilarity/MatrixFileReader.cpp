@@ -16,7 +16,7 @@ MatrixFileReader::MatrixFileReader(Logger *logger) {
 }
 
 vector<int> MatrixFileReader::init_reader(const char *matrix_file, const char *word_file) {
-	LOG(logger, "Initialize reader...");
+	LOG(logger, "%s", "Initialize reader...");
 	
 	FILE *fp = fopen(word_file, "r");
 	int id, num;
@@ -48,7 +48,7 @@ bool MatrixFileReader::load_data(int id) {
 	if(r_iptr[id] != NULL)
 		return true;
 	
-	_fseeki64(mat_fp, pos[id], 0);
+	fseek(mat_fp, pos[id], 0); /// change from _fseeki64(...)
 
 	int num;
 	fread(&num, INT_SIZE, 1, mat_fp);

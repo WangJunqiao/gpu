@@ -16,6 +16,7 @@ return 0;
 #include <vector>
 #include <list>
 #include <string>
+#include <string.h>
 #include <algorithm>
 #include <ctime>
 

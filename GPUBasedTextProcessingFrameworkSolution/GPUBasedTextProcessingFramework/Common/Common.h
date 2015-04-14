@@ -10,7 +10,7 @@ using namespace std;
 #define DEBUG
 
 #ifdef DEBUG
-	#define LOG(logger, format, ...) if(logger) (logger)->printf(format, __VA_ARGS__) 
+    #define LOG(logger, format, ...) if(logger)(logger)->printf(format, __VA_ARGS__)
 #else
 	#define LOG(logger, format, ...) 
 #endif
