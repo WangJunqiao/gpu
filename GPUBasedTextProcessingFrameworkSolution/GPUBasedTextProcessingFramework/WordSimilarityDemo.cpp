@@ -10,6 +10,9 @@
 #include <math.h>
 #include <vector>
 
+#include <sys/types.h>
+#include <dirent.h> 
+
 #include "./WordSimilarity/MatrixFileReader.h"
 #include "./WordSimilarity/WordSimCalc.h"
 #include "./WordSimilarity/WordSimCalcCPUImpl.h"
@@ -127,6 +130,7 @@ int word_similarity_test(int argc, char **argv) {
 		}
 	}
 	assert(output_dir.back() != '/' && output_dir.back() != '\\');
+	assert(opendir(output_dir.c_str()) != NULL);
 	Logger *logger = new Logger(stdout, file_logger);
 
 	WordSimCalculator *ins;
