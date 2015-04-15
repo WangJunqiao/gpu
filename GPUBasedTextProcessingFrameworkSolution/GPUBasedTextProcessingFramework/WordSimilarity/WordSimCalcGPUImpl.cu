@@ -130,7 +130,7 @@ The number of words may be very large(e.g. 200000), and because of the computati
 void GPUWordSimCalculator::calc_similarity_matrix() {
 	clock_t ttt = clock();
 
-	LOG(logger, "---------Begin Calculate Second Order Sim Matrix---------");
+	LOG(logger, "%s", "---------Begin Calculate Second Order Sim Matrix---------");
 	if(setted) {
 		LOG(logger, "Use user settings: block number = %d, thread number = %d, pair_limit = %d", 
 			block_num, thread_num, pairs_limit);
@@ -218,7 +218,7 @@ void GPUWordSimCalculator::calc_similarity_matrix() {
 			int b2 = seq[p].second, pb2_sz = (int)pairs[b2].size();
 
 			if(pb2_sz == 0) {
-				LOG(logger, "0 pairs need to be calc, skip this block!");
+				LOG(logger, "%s", "0 pairs need to be calc, skip this block!");
 				continue;
 			}
 			LOG(logger, "Ready to calc %d pairs with block(%d, %d), %d/%d completed..", 

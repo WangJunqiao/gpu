@@ -218,7 +218,7 @@ void WordSimCalculator::calc_mutual_info_matrix(DocumentSource *doc_src, int win
 
 			if(val <= 0) {
 				continue; //只考虑大于0的
-				LOG(logger, "bad case");
+				LOG(logger, "%s", "bad case");
 			}
 			max_val = max(max_val, val);
 
@@ -303,5 +303,5 @@ void WordSimCalculator::rebuild_triples(int order1, int order2) {
 	for(int i=0;i<sims.size();i++) {
 		delete sims[i];
 	}
-	LOG(logger, "rebuild successfully");
+	LOG(logger, "%s", "rebuild successfully");
 }
