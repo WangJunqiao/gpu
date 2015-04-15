@@ -97,6 +97,7 @@ static void print_usage() {
 	printf("-no_cal_mi   No need to calculate mutual information matrix\n");
 	printf("-log         log file name, e.g. ./log.txt\n");
 	printf("-output_dir  output directory, e.g. D:/aaa\n");
+	printf("-max_docs    max documents, eg 6000000\n");
 	exit(0);
 }
 
@@ -108,6 +109,7 @@ int word_similarity_test(int argc, char **argv) {
 	WikipediaDataSource *wiki_src = NULL;
 	int mask = 0;
 	string output_dir = ".";
+	int max_doc = 6000000; 
 	for (int i = 2; i < argc; i += 2) {
 		if (strcmp(argv[i], "-log") == 0 && i + 1 < argc) {
 			file_logger = new Logger(argv[i + 1], false);
@@ -125,6 +127,8 @@ int word_similarity_test(int argc, char **argv) {
 			mask |= 2;
 		} else if (strcmp(argv[i], "-output_dir") == 0 && i + 1 < argc) {
 			output_dir = argv[i + 1];
+		} else if (strcmp(argv[i], "-max_doc") == 0 && i + 1 < argc) {
+			max_doc = atoi(argv[i + 1]);
 		} else {
 			print_usage();
 		}
@@ -143,7 +147,7 @@ int word_similarity_test(int argc, char **argv) {
 			if (wiki_src == NULL) {
 				print_usage();
 			}
-			wiki_src->set_max_docs(6000000);
+			wiki_src->set_max_docs(max_doc);
 			ins->calc_mutual_info_matrix(wiki_src, win_size);
 		}
 		ins->calc_similarity_matrix();
@@ -156,7 +160,7 @@ int word_similarity_test(int argc, char **argv) {
 			if (wiki_src == NULL) {
 				print_usage();
 			}
-			wiki_src->set_max_docs(6000000);
+			wiki_src->set_max_docs(max_doc);
 			ins->calc_mutual_info_matrix(wiki_src, win_size);
 		}
 		ins->calc_similarity_matrix();
