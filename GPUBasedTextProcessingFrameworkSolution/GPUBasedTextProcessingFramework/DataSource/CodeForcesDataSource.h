@@ -18,10 +18,13 @@
 #define CODEFORCESDATASOURCE_H
 #include "DocumentSource.h"
 
-#include <io.h>
-#include <direct.h>
-#include <stdio.h>
+//#include <io.h>
+//#include <direct.h>
 
+#include <sys/types.h>
+#include <dirent.h>
+#include <stdio.h>
+#include <string.h>
 #include <iostream>
 #include <string>
 #include <map>
@@ -36,8 +39,12 @@ map<int,string> document;
 class CodeforcesDataSource : public DocumentSource {
 public:
 	string dir;
-	_finddata_t fileinfo; 
-	map<int, string> document;
+	//_finddata_t fileinfo; 
+	
+    DIR* files;
+    string next_file_name;
+
+    map<int, string> document;
 	map<int, vector<int> > afterRefineCandPairs;
 	int flag;
 	int number;
@@ -64,17 +71,18 @@ public:
 
 bool CodeforcesDataSource::openSource() {
 	// string dir="";
-	if (_access(dir.c_str(), 06) == -1)  
+	files = opendir(dir.c_str());
+    /*if (_access(dir.c_str(), 06) == -1)  
 	{  
 		cerr << "error: directory does not exist." << endl;  
 		exit(-1);  
-	}  
+	} */ 
 
 	if (dir.at(dir.length() - 1) != '\\')  
 	{  
 		dir += '\\';  
 	}  
-
+/*
 	if (_chdir(dir.c_str()) != 0)  
 	{  
 		cerr << "error: function _chdir() failed.";  
@@ -82,12 +90,24 @@ bool CodeforcesDataSource::openSource() {
 	}  
 	memset(&fileinfo, 0x0, sizeof(fileinfo));
 	flag=0;
-	number=0;
+	number=0;*/
 	return true;
 }
 
 bool CodeforcesDataSource::hasNext() {
-	if(flag==0){
+	dirent *tmp;
+    while ((tmp = readdir(files)) != NULL) {
+        next_file_name = tmp->d_name;
+        if (next_file_name.length() < 4) {
+            continue;
+        }
+        if (next_file_name.substr(next_file_name.length() - 4) == ".txt") {
+            return true;
+        }
+    }
+    return false;
+    /*
+    if(flag==0){
 		iFind = _findfirst("*.txt", &fileinfo);
 		flag=1;
 		if(iFind!=-1)
@@ -97,12 +117,13 @@ bool CodeforcesDataSource::hasNext() {
 		if(_findnext(iFind, &fileinfo)==0)
 			return true;
 	}
-	return false;
+	return false; */
 }
 
 string CodeforcesDataSource::getNextDocument() {
-	string filePath(dir+fileinfo.name);
-	char file[100];
+//	string filePath(dir+fileinfo.name);
+    string filePath(dir + next_file_name);
+    char file[100];
 	int i;
 	for(i=0;i<filePath.length();i++)
 		file[i]=filePath[i];

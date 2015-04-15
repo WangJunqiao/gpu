@@ -1,8 +1,9 @@
 #include "IDFManager.h"
+#include <string.h>
 
 void IDFManager::calc_idf(DocumentSource *doc_src, const char* out_idf_file) {
 	if(!doc_src->openSource()){
-		LOG(logger, "cannot open document source!");
+		LOG(logger, "%s", "cannot open document source!");
 		return;
 	}
 	
@@ -11,7 +12,7 @@ void IDFManager::calc_idf(DocumentSource *doc_src, const char* out_idf_file) {
 	set<string> s_stop_words;
 	int stop_word_index = 0;
 	while (_stop_words[stop_word_index]){s_stop_words.insert(_stop_words[stop_word_index]), stop_word_index++;}
-	LOG(logger, "begin to calculate idf:");
+	LOG(logger, "%s", "begin to calculate idf:");
 	while(doc_src->hasNext()) {
 		map<string, bool> word_is_in_doc;
 		string s  = doc_src->getNextDocument();
@@ -30,12 +31,12 @@ void IDFManager::calc_idf(DocumentSource *doc_src, const char* out_idf_file) {
 		total_doc_num++;
 		if (total_doc_num % 1000 == 0)LOG(logger, "processed %d documents.", total_doc_num);
 	}
-	LOG(logger, "documents processed finished.");
+	LOG(logger, "%s", "documents processed finished.");
 	map<string, int>::iterator it;
 	int count = 0;
 	FILE *t_fp = fopen(out_idf_file, "w");
 	assert(t_fp != NULL);
-	LOG(logger, "begin to save word_idf:");
+	LOG(logger, "%s", "begin to save word_idf:");
 	for (it = docnum_per_word.begin(); it != docnum_per_word.end(); it++) {
 		double d = log(static_cast<double>(total_doc_num)/(docnum_per_word[it->first]+1));
 		fprintf(t_fp, "%s\t%.4lf\n", (it->first).c_str(), d);
@@ -48,7 +49,7 @@ void IDFManager::calc_idf(DocumentSource *doc_src, const char* out_idf_file) {
 
 void IDFManager::calc_idf(DocumentSource *doc_src, const int n, const char* out_idf_file) {
 	if(!doc_src->openSource()){
-		LOG(logger, "cannot open document source!");
+		LOG(logger, "%s", "cannot open document source!");
 		return;
 	}
 
@@ -58,7 +59,7 @@ void IDFManager::calc_idf(DocumentSource *doc_src, const int n, const char* out_
 	set<string> s_stop_words;
 	int stop_word_index = 0;
 	while (_stop_words[stop_word_index]){s_stop_words.insert(_stop_words[stop_word_index]), stop_word_index++;}
-	LOG(logger, "begin to calculate idf:");
+	LOG(logger, "%s", "begin to calculate idf:");
 	while(doc_src->hasNext()) {
 		map<string, bool> word_is_in_doc;
 		string s  = doc_src->getNextDocument();
@@ -88,7 +89,7 @@ void IDFManager::calc_idf(DocumentSource *doc_src, const int n, const char* out_
 		count_word.resize(n);
 		int count = 0;
 		FILE *fp = fopen(out_idf_file, "w");
-		LOG(logger, "begin to save word_idf:");
+		LOG(logger, "%s", "begin to save word_idf:");
 		vector<pair<int, string> >::iterator v_it;
 		unordered_map<string, int>::iterator un_it;
 		for (v_it = count_word.begin(); v_it != count_word.end(); v_it++) {
@@ -105,7 +106,7 @@ void IDFManager::calc_idf(DocumentSource *doc_src, const int n, const char* out_
 	else {
 		int count = 0;
 		FILE *fp = fopen(out_idf_file, "w");
-		LOG(logger, "begin to save word_idf:");
+		LOG(logger, "%s", "begin to save word_idf:");
 		unordered_map<string, int>::iterator un_it;
 		vector<pair<double, string> > idf_word;
 		for (un_it = docnum_per_word.begin(); un_it != docnum_per_word.end(); un_it++) {
@@ -121,13 +122,13 @@ void IDFManager::calc_idf(DocumentSource *doc_src, const int n, const char* out_
 		}
 		fclose(fp);
 	}
-	LOG(logger, "documents processed finished.");
+	LOG(logger, "%s", "documents processed finished.");
 }
 
 void IDFManager::calc_tfidf(DocumentSource *doc_src, const char *vocabulary_file, 
 	const char* out_tf_idf_file, CALC_TYPE calc_type, int n) {
 	if(!doc_src->openSource()){
-		LOG(logger, "cannot open document source!");
+		LOG(logger, "%s", "cannot open document source!");
 		return;
 	}
 	if (calc_type == HAS_NO_IDF_FILE) {
@@ -191,7 +192,7 @@ void IDFManager::_calc_tfidf_with_idf(DocumentSource *doc_src, const char *word_
 	while (_stop_words[stop_word_index]){stop_words.insert(_stop_words[stop_word_index]), stop_word_index++;}
 
 	vector<map<string, int> > words_per_doc;  //word count of a certain document
-	LOG(logger, "begin to calculate tfidf: ");
+	LOG(logger, "%s", "begin to calculate tfidf: ");
 	while(doc_src->hasNext()) {
 		string s  = doc_src->getNextDocument();
 		char c[1000];
@@ -209,14 +210,14 @@ void IDFManager::_calc_tfidf_with_idf(DocumentSource *doc_src, const char *word_
 		total_doc_num++;
 		if (total_doc_num % 1000 == 0)LOG(logger, "processed %d documents.", total_doc_num);
 	}
-	LOG(logger, "documents processed finished.");
+	LOG(logger, "%s", "documents processed finished.");
 	fprintf(fp1, "%d\t%d\n", total_doc_num, word_idf_map.size());
 	map<string, int>::iterator it;
 	unordered_map<string, double>::iterator it_d;
 	vector<pair<string, double> >::iterator v_it;
 	vector<pair<string, double> > v_word_idf(word_idf_map.begin(), word_idf_map.end());
 	sort(v_word_idf.begin(), v_word_idf.end());
-	LOG(logger, "begine to save tfidf value:");
+	LOG(logger, "%s", "begine to save tfidf value:");
 	for (int i = 0; i < words_per_doc.size(); i++) {
 		for (it = words_per_doc[i].begin(); it != words_per_doc[i].end(); it++) {
 			it_d = word_idf_map.find(it->first);
@@ -228,7 +229,7 @@ void IDFManager::_calc_tfidf_with_idf(DocumentSource *doc_src, const char *word_
 		}
 		if (i % 1000 == 0)LOG(logger, "saved %d words.", i);
 	}
-	LOG(logger, "save finished.");
+	LOG(logger, "%s", "save finished.");
 
 	fclose(fp1);
 	fclose(fp2);
@@ -246,7 +247,7 @@ void IDFManager::_calc_tfidf_without_idf(DocumentSource *doc_src, const char *ou
 	set<string> s_stop_words;
 	int stop_word_index = 0;
 	while (_stop_words[stop_word_index]){s_stop_words.insert(_stop_words[stop_word_index]), stop_word_index++;}
-	LOG(logger, "begin to calculate tfidf: ");
+	LOG(logger, "%s", "begin to calculate tfidf: ");
 	while(doc_src->hasNext()) {
 		map<string, bool> word_is_in_doc;
 		map<string, int> word_count_per_doc;
@@ -286,7 +287,7 @@ void IDFManager::_calc_tfidf_without_idf(DocumentSource *doc_src, const char *ou
 			word_idf[it->first] = d;
 		}
 	}
-	LOG(logger, "begine to save tfidf value:");
+	LOG(logger, "%s", "begine to save tfidf value:");
 	fprintf(fp1, "%d\t%d\n", total_doc_num, vocabulary.size()); //save the doc num and word num to the head of tf-idf file
 	for (int i = 0; i < total_doc_num; i++) {
 		for (it = words_per_doc[i].begin(); it != words_per_doc[i].end(); it++) {
@@ -300,14 +301,14 @@ void IDFManager::_calc_tfidf_without_idf(DocumentSource *doc_src, const char *ou
 		if (i % 100 == 0)LOG(logger, "saved %d documents.", i);
 		if (i == total_doc_num - 1)LOG(logger, "saved %d documents.", i);
 	}
-	LOG(logger, "tfidf save finished.");
+	LOG(logger, "%s", "tfidf save finished.");
 	int ii, size;
 	for (ii = 0, size = vocabulary.size(); ii < size; ii++){
 		fprintf(fp2, "%s\n", vocabulary[ii].c_str());
 		if (ii % 1000 == 0)LOG(logger, "saved %d words.", ii);
 	}
 	LOG(logger, "saved %d words.", ii);
-	LOG(logger, "vocabulary save finished.");
+	LOG(logger, "%s", "vocabulary save finished.");
 
 	fclose(fp1);
 	fclose(fp2);

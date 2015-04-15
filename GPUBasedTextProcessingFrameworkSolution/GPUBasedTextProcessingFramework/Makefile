@@ -127,7 +127,8 @@ $(OBJDIR)/%.o : %.cu
 _OBJs = libstem_api.a KMeansClusteringCPU.o KMeansClusteringGPU.o \
 		DocDupDetector.o DocDupDetectorCPU.o DocDupDetectorGPU.o DocGenerator.o \
 		MatrixFileReader.o WordSimCalc.o WordSimCalcCPUImpl.o WordSimCalcGPUImpl.o \
-		DocClusteringDemo.o DocDupDetectionDemo.o DocKNNDemo.o WordSimilarityDemo.o\
+		DocClusteringDemo.o DocDupDetectionDemo.o  WordSimilarityDemo.o\
+		IDFManager.o stop_words_list.o \
 		main.o test_word_sim.o testmul.o
 OBJs = $(patsubst %,$(OBJDIR)/%,$(_OBJs))
 
@@ -141,6 +142,8 @@ run: build
 
 clean:
 	rm -f *.o
+	rm -rf ./objs
+	rm -f ./Common/stemmer/*.o
 #	rm -rf ../../bin/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)/FDTD3d
 
 clobber: clean

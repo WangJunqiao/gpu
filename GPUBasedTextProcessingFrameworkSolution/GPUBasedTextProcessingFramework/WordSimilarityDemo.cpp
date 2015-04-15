@@ -5,6 +5,9 @@
 #include <iostream>
 #include <list>
 #include <queue>
+#include <string.h>
+#include <memory.h>
+#include <math.h>
 #include <vector>
 
 #include "./WordSimilarity/MatrixFileReader.h"
