@@ -94,7 +94,7 @@ endif
 # Target rules
 all: build
 
-build: main 
+build: GPU-exe 
 
 OBJDIR = ./objs
 INCLUDES += -I. -ICommon/stemmer/ -ICommon/ -IDataSource/ -IDocClustering/ -IDocDupDetection/ -IWordSimilarity/
@@ -132,7 +132,7 @@ _OBJs = libstem_api.a KMeansClusteringCPU.o KMeansClusteringGPU.o \
 		main.o test_word_sim.o testmul.o
 OBJs = $(patsubst %,$(OBJDIR)/%,$(_OBJs))
 
-main: $(OBJs) 
+GPU-exe: $(OBJs) 
 	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES)
 #	$(EXEC) mkdir -p ../../bin/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)
 #	$(EXEC) cp $@ ../../bin/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)
