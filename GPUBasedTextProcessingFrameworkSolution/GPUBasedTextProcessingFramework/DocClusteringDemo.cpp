@@ -4,6 +4,7 @@
 #include <time.h>
 #include <cuda.h>
 #include <string.h>
+#include <limits.h>
 
 #include "./DocClustering/KMeansClustering.h"
 #include "./DataSource/WikipediaDataSource.h"
