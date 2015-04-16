@@ -1,6 +1,7 @@
 #include "Demo.h"
 
 #include <stdio.h>
+#include <string.h>
 
 void print_usage_main() {
 	puts("Demo Usage   -options");
@@ -15,6 +16,8 @@ int main(int argc, char** argv) {
 	}
 	if (strcmp(argv[1], "-word_sim") == 0) {
 		word_similarity_test(argc, argv);
+	} else if (strcmp(argv[1], "-doc_dup") == 0) {
+		doc_dup_detection_test(argc, argv);
 	} else {
 		print_usage_main();
 		return 0;

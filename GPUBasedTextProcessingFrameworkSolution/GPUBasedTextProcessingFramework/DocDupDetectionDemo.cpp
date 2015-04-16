@@ -13,10 +13,11 @@ using namespace std;
 
 #define MAX_DUP_DOCUMENTS 2000
 
-void docDupDetectorTest(DocDupDetector *detector, CodeforcesDataSource *dataSource) {
+void docDupDetectorTest(DocDupDetector *detector, string files_dir) {
 	detector->initialize();
 
-	dataSource->set_files_directory("d:/dd/codeforce-code");
+	CodeforcesDataSource *dataSource = new CodeforcesDataSource();
+	dataSource->set_files_directory(files_dir);
 	dataSource->openSource();
 	
 	int cnt = 0;
@@ -46,24 +47,61 @@ void docDupDetectorTest(DocDupDetector *detector, CodeforcesDataSource *dataSour
 	//fclose(fp);
 }
 
+static void print_usage() {
+	printf("Document Duplication Detection Usage\n");
+	printf("-files_dir   define where the text files store.\n");
+	printf("-cpu         test in CPU\n");
+	printf("-gpu         test in GPU\n");
+	printf("-log         log file name, e.g. ./log.txt\n");
+	printf("-max_docs    max documents, eg 6000000\n");
+	exit(0);
+}
 
+int doc_dup_detection_test(int argc, char** argv) {
+	Logger *file_logger = NULL;
+	string files_dir = ".";
+	int mask = 0;
+	int max_doc = 50000; 
+	
+	for (int i = 2; i < argc;) {
+		if (strcmp(argv[i], "-log") == 0 && i + 1 < argc) {
+			file_logger = new Logger(argv[i + 1], false);
+			i += 2;
+		} else if (strcmp(argv[i], "-files_dir") == 0 && i + 1 < argc) {
+			files_dir = argv[i + 1];
+			i += 2;
+		} else if (strcmp(argv[i], "-cpu") == 0) {
+			mask |= 1;
+			i ++;
+		} else if (strcmp(argv[i], "-gpu") == 0) {
+			mask |= 2;
+			i ++;
+		} else if (strcmp(argv[i], "-max_doc") == 0 && i + 1 < argc) {
+			max_doc = atoi(argv[i + 1]);
+			i += 2;
+		} else {
+			print_usage();
+		}
 
-int doc_dup_detection_test() {
-	Logger logger (stdout);
-	CodeforcesDataSource *cf = new CodeforcesDataSource();
-	DocDupDetector *det;
+	}
+	Logger *logger = new Logger(stdout, file_logger);
+	
+	clock_t cpu_time = 1, gpu_time = 1;
 
-	det = new DocDupDetectorCPU(&logger);
-	docDupDetectorTest(det, cf);
-	clock_t cpu_time = det->core_time;
+	if (mask & 1) {
+		DocDupDetector *det = new DocDupDetectorCPU(logger);
+		docDupDetectorTest(det, cf);
+		cpu_time = det->core_time;
+		LOG(logger, "%s", "Test cpu doc dup dector complete");
+		delete det;
+	}
 
-	printf("Test cpu doc dup dector complete\n");
-
-	delete det;
-	det = new DocDupDetectorGPU(&logger);
-	docDupDetectorTest(det, cf);
-	clock_t gpu_time = det->core_time;
-
+	if (mask & 2) {
+		DocDupDetector *det = new DocDupDetectorGPU(logger);
+		docDupDetectorTest(det, cf);
+		gpu_time = det->core_time;
+		delete det;
+	}
 
 	printf("cpu_time = %lf s, gpu_time = %lf s, speed up = %.2lf\n", cpu_time / (double)CLOCKS_PER_SEC, gpu_time / (double)CLOCKS_PER_SEC, cpu_time / (double)gpu_time);
 	
