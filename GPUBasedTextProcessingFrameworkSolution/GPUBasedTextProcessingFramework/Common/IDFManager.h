@@ -92,6 +92,7 @@ public:
 	/// saved to file @ref out_idf_file but will not be stored in the member variable @ref word_idf
 	///
 	/// @param[in] doc_src: the document source we are to calculate the idf value;
+	/// @param[int] n: the top words we consider.
 	/// @param[out] out_idf_file: file name you want to save the idf value to
 	/// @return NULL
 	/// @note 1. the result will be saved to file @ref out_idf_file,

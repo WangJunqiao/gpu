@@ -1,7 +1,7 @@
 #ifndef DEMO_H
 #define DEMO_H
 
-extern int doc_clustering_test();
+extern int doc_clustering_test(int argc, char** argv);
 
 extern int word_similarity_test(int argc, char** argv);
 
