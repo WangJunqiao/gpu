@@ -81,6 +81,7 @@ void IDFManager::calc_idf(DocumentSource *doc_src, const int n, const char* out_
 			threshold *= 2;
 		}
 	}
+    LOG(logger, "%s", "Read all docs end.");
 	if (n < word_count.size()) {
 		map<string, int>::iterator it;
 		vector<pair<int, string> > count_word;
