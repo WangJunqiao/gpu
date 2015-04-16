@@ -414,7 +414,7 @@ void DocDupDetectorGPU::calculate_dups() {
 	for(int i=0;i<doc_num;i++) {
 		int id = order_by_length[i].second;
 		char *d_c = memo_mana_c.gpu_malloc(hashstrs_length[id]);
-		LOG(logger, "%d[old %d]th hashstrs: %s", i, id, hashstrs_buffer[id]); 
+		//LOG(logger, "%d[old %d]th hashstrs: %s", i, id, hashstrs_buffer[id]); 
 		safeCudaCall(cudaMemcpy(d_c, hashstrs_buffer[id], sizeof(char)*hashstrs_length[id], cudaMemcpyHostToDevice));
 		h_hashstrs[i] = d_c;
 		h_hashstrs_length[i] = hashstrs_length[id];
