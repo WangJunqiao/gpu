@@ -16,9 +16,10 @@ using namespace std;
 
 
 #define MAX_DUP_DOCUMENTS 10000
-#define MAX_DUP_HASHSTRING_LENGTH (100)   //7k
+#define MAX_HASH_STR_LEN 128
 
-#define MAX_HASH_STR_LEN 512
+#define MAX_DUP_HASHSTRING_LENGTH (MAX_HASH_STR_LEN + 2)   //7k
+
 #define ROLLING_WINDOW 7
 #define THRESHOLD 0.7
 #define MINIMUM_SCORE 80
