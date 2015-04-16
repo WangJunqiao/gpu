@@ -29,7 +29,7 @@ void docDupDetectorTest(DocDupDetector *detector, string files_dir, int max_doc)
 	FILE *fp = stdout;
 	assert(fp != NULL);
 	while(cas--) {
-		int did = rand() * rand() % N;
+		int did = rand() * (long long)rand() % N;
 		vector<int> candies = detector->get_candidate_dup_docs(did);
 		string doc_name = dataSource->getDocumentName(did);
 		//cout<<doc_name<<endl;
@@ -85,7 +85,7 @@ int doc_dup_detection_test(int argc, char** argv) {
 
 	if (mask & 1) {
 		DocDupDetector *det = new DocDupDetectorCPU(logger);
-		docDupDetectorTest(det, files_dir);
+		docDupDetectorTest(det, files_dir, max_doc);
 		cpu_time = det->core_time;
 		LOG(logger, "%s", "Test cpu doc dup dector complete");
 		delete det;
@@ -93,7 +93,7 @@ int doc_dup_detection_test(int argc, char** argv) {
 
 	if (mask & 2) {
 		DocDupDetector *det = new DocDupDetectorGPU(logger);
-		docDupDetectorTest(det, files_dir);
+		docDupDetectorTest(det, files_dir, max_doc);
 		gpu_time = det->core_time;
 		delete det;
 	}
