@@ -11,21 +11,16 @@
 
 using namespace std;
 
-#define MAX_DUP_DOCUMENTS 2000
-
-void docDupDetectorTest(DocDupDetector *detector, string files_dir) {
+void docDupDetectorTest(DocDupDetector *detector, string files_dir, int max_doc) {
 	detector->initialize();
 
 	CodeforcesDataSource *dataSource = new CodeforcesDataSource();
 	dataSource->set_files_directory(files_dir);
 	dataSource->openSource();
 	
-	int cnt = 0;
-	while(dataSource->hasNext()) {
+	int N;
+	for(N = 0; dataSource->hasNext() && N < max_doc; ++ N) {
 		detector->add_document(dataSource->getNextDocument());
-		cnt ++;
-		if(cnt == MAX_DUP_DOCUMENTS)
-			break;
 	}
 	detector->calculate_dups();
 	//detector->refine();
@@ -34,7 +29,7 @@ void docDupDetectorTest(DocDupDetector *detector, string files_dir) {
 	FILE *fp = stdout;
 	assert(fp != NULL);
 	while(cas--) {
-		int did = rand() * rand() % MAX_DUP_DOCUMENTS;
+		int did = rand() * rand() % N;
 		vector<int> candies = detector->get_candidate_dup_docs(did);
 		string doc_name = dataSource->getDocumentName(did);
 		//cout<<doc_name<<endl;

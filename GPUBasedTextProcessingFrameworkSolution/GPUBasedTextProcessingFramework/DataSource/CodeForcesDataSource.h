@@ -39,26 +39,23 @@ map<int,string> document;
 class CodeforcesDataSource : public DocumentSource {
 public:
 	string dir;
-	
-    DIR* files;
-    string next_file_name;
+    int number;
+	DIR* files;
+	string next_file_name;
 
     map<int, string> document;
 	map<int, vector<int> > afterRefineCandPairs;
-	int number;
+	
 
 	bool openSource();
 	void set_files_directory(string dir) {
 		this->dir = dir;
 	}
 	bool hasNext();
-	//	CodeforcesDataSource();
 	string getNextDocument();
-	void closeSource() {
-
-	}
-
+	void closeSource() { }
 	string getDocumentName(int id);
+	
 	~CodeforcesDataSource();
 };
 
@@ -67,9 +64,10 @@ public:
 
 bool CodeforcesDataSource::openSource() {
 	files = opendir(dir.c_str());
- 
+	number = 0;
+	document.clear();
 
-	if (dir.at(dir.length() - 1) != '\\') {  
+	if (dir[dir.length() - 1] != '/') {  
 		dir += "/";  
 	}  
 
@@ -92,8 +90,7 @@ bool CodeforcesDataSource::hasNext() {
 
 string CodeforcesDataSource::getNextDocument() {
     string filePath(dir + next_file_name);
-	
-	printf("file = %s\n", filePath.c_str());
+	//printf("file = %s\n", filePath.c_str());
 
 	static char content[1000000];
 	FILE *fp = NULL;
@@ -112,6 +109,7 @@ string CodeforcesDataSource::getNextDocument() {
 	document[number ++] = next_file_name;
 	return content;
 }
+
 CodeforcesDataSource::~CodeforcesDataSource() {
 
 }
@@ -119,4 +117,5 @@ CodeforcesDataSource::~CodeforcesDataSource() {
 string CodeforcesDataSource::getDocumentName(int id){
 	return document[id];
 }
+
 #endif
