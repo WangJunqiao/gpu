@@ -8,7 +8,7 @@ Sample command to run document duplication detection:
 ./GPU-exe -doc_dup -files_dir /mnt/sdb1/dd/codeforce-code -cpu -gpu -max_doc 10000
 
 Sample command to generate idf file:
-./GPU-exe -doc_clustering -idf_file /mnt/sdb1/dd/gpu/data/idf_file -calc_idf 20000 /mnt/sdb1/dd/gpu/data/wiki_plain_txt
+./GPU-exe -doc_clustering -idf_file /mnt/sdb1/dd/gpu/data/idf_file -calc_idf 20000 /mnt/sdb1/dd/gpu/data/wiki_plain_txt 6000000
 
 Sample command to run document clustering:
 ./GPU-exe -doc_clustering -idf_file /mnt/sdb1/dd/gpu/data/idf_file -corpus /mnt/sdb1/dd/gpu/data/wiki_plain_txt -cpu -gpu -doc_num 200 -centroids 30 -log /mnt/sdb1/dd/gpu/data/log.txt

@@ -36,7 +36,7 @@ static void test(KMeansClustering *cluAlgo, DocumentSource *doc_src, int doc_num
 static void print_usage() {
 	printf("Document Clustering Usage\n");
 	printf("-idf_file    indicate the idf-file name.\n");
-	printf("-calc_idf    need to calc idf value, followed by top-words-num big-corpus. e.g. -calc_idf 20000 ./plain.txt");
+	printf("-calc_idf    need to calc idf value, followed by top-words-num big-corpus lines. e.g. -calc_idf 20000 ./plain.txt 6000000");
 	printf("-cpu         test in CPU\n");
 	printf("-gpu         test in GPU\n");
 	printf("-corpus      big text corpus, e.g. ./data/wiki_plain_txt\n");
@@ -54,6 +54,7 @@ int doc_clustering_test(int argc, char** argv) {
 	bool calc_idf = false;
 	int top_words = 20000;
 	string idf_doc_src;
+    int idf_doc_num = 6000000;
 
 	int mask = 0;
 	string corpus = "";
@@ -62,11 +63,12 @@ int doc_clustering_test(int argc, char** argv) {
 		if (strcmp(argv[i], "-log") == 0 && i + 1 < argc) {
 			file_logger = new Logger(argv[i + 1], false);
 			i += 2;
-		} else if (strcmp(argv[i], "-calc_idf") == 0 && i + 2 < argc) {
+		} else if (strcmp(argv[i], "-calc_idf") == 0 && i + 3 < argc) {
             calc_idf = true;
             top_words = atoi(argv[i + 1]);
 			idf_doc_src = argv[i + 2];
-			i += 3;
+            idf_doc_num = atoi(argv[i + 3]);
+			i += 4;
 		} else if (strcmp(argv[i], "-idf_file") == 0 && i + 1 < argc) {
 			idf_file = argv[i + 1];
 			i += 2;
@@ -96,7 +98,7 @@ int doc_clustering_test(int argc, char** argv) {
 	IDFManager idf_manager(&idf_logger);
 	if (calc_idf) {
 		WikipediaDataSource *doc_src = new WikipediaDataSource(idf_doc_src);
-		doc_src->set_max_docs(INT_MAX);
+		doc_src->set_max_docs(idf_doc_num);
 		idf_manager.calc_idf(doc_src, top_words, idf_file.c_str());
 	}
 
