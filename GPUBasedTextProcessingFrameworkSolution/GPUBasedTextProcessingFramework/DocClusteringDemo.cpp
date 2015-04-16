@@ -95,6 +95,7 @@ int doc_clustering_test(int argc, char** argv) {
 	IDFManager idf_manager(&idf_logger);
 	if (calc_idf) {
 		WikipediaDataSource *doc_src = new WikipediaDataSource(idf_doc_src);
+		doc_src->set_max_docs(INT_MAX);
 		idf_manager.calc_idf(doc_src, top_words, idf_file.c_str());
 	}
 
