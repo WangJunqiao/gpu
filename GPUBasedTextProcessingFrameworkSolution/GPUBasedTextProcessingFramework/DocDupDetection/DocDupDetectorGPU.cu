@@ -16,7 +16,7 @@ using namespace std;
 
 
 #define MAX_DUP_DOCUMENTS 10000
-#define MAX_DUP_HASHSTRING_LENGTH (520)   //7k
+#define MAX_DUP_HASHSTRING_LENGTH (100)   //7k
 
 #define MAX_HASH_STR_LEN 512
 #define ROLLING_WINDOW 7
@@ -67,7 +67,7 @@ void DocDupDetectorGPU::add_document(string doc) {
 	strcpy(p, doc.c_str());
 
 	string code = "";
-	int block_size = 32;
+	int block_size = 4;
 	while(code=="" || code.length()>MAX_HASH_STR_LEN) {
 		code = "";
 		for(int i=0, j;i<(int)doc.length();i++) {
