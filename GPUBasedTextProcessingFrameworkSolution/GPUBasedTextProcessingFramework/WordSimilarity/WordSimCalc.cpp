@@ -245,7 +245,7 @@ void WordSimCalculator::calc_mutual_info_matrix(DocumentSource *doc_src, int win
 	}
 	for(int i=0;i<W;i++) {
 		string wd = words[i];
-		fprintf(fp, "%d %s %lld %d\n", i, wd.c_str(), pos[i], cnt_map[i]->size());
+		fprintf(fp, "%d %s %lld %d\n", i, wd.c_str(), pos[i], (int)cnt_map[i]->size());
 	}
 	fclose(fp);
 	fclose(fout);

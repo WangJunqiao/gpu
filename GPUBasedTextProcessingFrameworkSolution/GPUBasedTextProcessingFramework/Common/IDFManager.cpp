@@ -211,7 +211,7 @@ void IDFManager::_calc_tfidf_with_idf(DocumentSource *doc_src, const char *word_
 		if (total_doc_num % 1000 == 0)LOG(logger, "processed %d documents.", total_doc_num);
 	}
 	LOG(logger, "%s", "documents processed finished.");
-	fprintf(fp1, "%d\t%d\n", total_doc_num, word_idf_map.size());
+	fprintf(fp1, "%d\t%d\n", total_doc_num, (int)word_idf_map.size());
 	map<string, int>::iterator it;
 	unordered_map<string, double>::iterator it_d;
 	vector<pair<string, double> >::iterator v_it;
@@ -288,7 +288,7 @@ void IDFManager::_calc_tfidf_without_idf(DocumentSource *doc_src, const char *ou
 		}
 	}
 	LOG(logger, "%s", "begine to save tfidf value:");
-	fprintf(fp1, "%d\t%d\n", total_doc_num, vocabulary.size()); //save the doc num and word num to the head of tf-idf file
+	fprintf(fp1, "%d\t%d\n", total_doc_num, (int)vocabulary.size()); //save the doc num and word num to the head of tf-idf file
 	for (int i = 0; i < total_doc_num; i++) {
 		for (it = words_per_doc[i].begin(); it != words_per_doc[i].end(); it++) {
 			vector<string>::iterator vec_it = lower_bound(vocabulary.begin(), vocabulary.end(), it->first);

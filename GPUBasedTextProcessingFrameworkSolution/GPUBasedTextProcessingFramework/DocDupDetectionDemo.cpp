@@ -65,7 +65,7 @@ int doc_dup_detection_test() {
 	clock_t gpu_time = det->core_time;
 
 
-	printf("cpu_time = %d ms, gpu_time = %d ms, speed up = %.2lf\n", cpu_time, gpu_time, cpu_time / (double)gpu_time);
+	printf("cpu_time = %lf s, gpu_time = %lf s, speed up = %.2lf\n", cpu_time / (double)CLOCKS_PER_SEC, gpu_time / (double)CLOCKS_PER_SEC, cpu_time / (double)gpu_time);
 	
 	return 0;
 }

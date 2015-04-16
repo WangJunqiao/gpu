@@ -99,13 +99,13 @@ int test_word_sim() {
 	cudaFree(dev2);
 	cudaFree(ans);
 	gpu += clock() - cur;
-	printf("gpu = %d ms\n", gpu);
+	printf("gpu = %lf s\n", gpu / (double)CLOCKS_PER_SEC);
 
 	cur = clock();
 	force();
 	cpu += clock() - cur;
 
-	printf("cpu = %d ms, gpu = %d ms, speed up = %lf\n", cpu, gpu, cpu/(double)gpu);
+	printf("cpu = %lf s, gpu = %lf s, speed up = %lf\n", cpu / (double)CLOCKS_PER_SEC, gpu / (double)CLOCKS_PER_SEC, cpu / (double)gpu);
 
 	float ma = 0.0;
 	for (int i = 0; i < N; i ++) {
@@ -119,5 +119,6 @@ int test_word_sim() {
 	while (cin >> x >> y) {
 		printf("gpu value = %f, cpu value = %f\n", si[x][y], fsi[x][y]);
 	}
+    return 0;
 }
 

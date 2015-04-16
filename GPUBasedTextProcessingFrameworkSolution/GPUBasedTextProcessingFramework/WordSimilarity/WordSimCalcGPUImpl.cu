@@ -207,7 +207,7 @@ void GPUWordSimCalculator::calc_similarity_matrix() {
 				//}
 			}
 		}
-		LOG(logger, "Prepare all pairs need to be calc, time used = %d ms", clock()-t);
+		LOG(logger, "Prepare all pairs need to be calc, time used = %lf s", (clock()-t) / (double)CLOCKS_PER_SEC);
 
 		t = clock();
 		PIF** dev_data1 = array_copy_host_to_device(reader.r_iptr+start1, reader.r_fptr+start1, end1-start1);
@@ -256,7 +256,7 @@ void GPUWordSimCalculator::calc_similarity_matrix() {
 			calc_parallel<<<block_num, thread_num>>>(dev_data1, dev_data2, dev_jobs, d_ans, job_num);
 			cudaDeviceSynchronize();
 			gpu_time += (clock()-t);
-			LOG(logger, "GPU calculate, time used=%d ms", (int)(clock()-t));
+			LOG(logger, "GPU calculate, time used=%lf s", (clock()-t) / (double)CLOCKS_PER_SEC);
 
 			t = clock();
 			safeCudaCall(cudaMemcpy(ans.data(), d_ans, FLT_SIZE*job_num, cudaMemcpyDeviceToHost));
@@ -272,8 +272,8 @@ void GPUWordSimCalculator::calc_similarity_matrix() {
 				fwrite(&ans[i], sizeof(float), 1, fp);
 			}
 			write_time += (clock()-t);
-			LOG(logger, "dispatch %d pairs' result, time used=%d ms\n", 
-					(int)pairs[b2].size(), clock()-t);
+			LOG(logger, "dispatch %d pairs' result, time used=%lf s\n", 
+					(int)pairs[b2].size(), (clock()-t) / (double)CLOCKS_PER_SEC);
 
 			t = clock();
 			free_cuda_memory(dev_data2, len2);
@@ -291,12 +291,12 @@ void GPUWordSimCalculator::calc_similarity_matrix() {
 	}
 
 	printf("all calc pairs = %lld\n", all_pairs);
-	printf("reader reading_time: %d ms\n", read_time);
-	printf("GPU time: %d ms\n", gpu_time);
-	printf("write time: %d ms\n", write_time);
-	printf("data copy time: %d ms\n", data_copy_time);
-	printf("data release time: %d ms\n", data_release_time);
-	printf("tot time: %d ms\n", (int)(clock()-tt));
+	printf("reader reading_time: %lf s\n", read_time / (double)CLOCKS_PER_SEC);
+	printf("GPU time: %lf s\n", gpu_time / (double)CLOCKS_PER_SEC);
+	printf("write time: %lf s\n", write_time / (double)CLOCKS_PER_SEC);
+	printf("data copy time: %lf s\n", data_copy_time / (double)CLOCKS_PER_SEC);
+	printf("data release time: %lf s\n", data_release_time / (double)CLOCKS_PER_SEC);
+	printf("tot time: %lf s\n", (clock()-tt) / (double)CLOCKS_PER_SEC);
 	fclose(fp);
 
 	core_time = clock() - ttt;

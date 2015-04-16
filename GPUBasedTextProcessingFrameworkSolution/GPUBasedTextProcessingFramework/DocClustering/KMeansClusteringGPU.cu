@@ -258,7 +258,7 @@ void KMeansClusteringGPU::run_clustering(int k) {
 		calcAllDisByGpu2<128> <<<block_num, 128>>>(dev_darr, dev_karr, doc_num, k, dimensions, dev_dis);
 		//calcAllDisByGpu3<<<1024, 32>>>(dev_darr, dev_karr, doc_num, k, dimensions, dev_dis);
 		cudaDeviceSynchronize();
-		printf("kernel call time: %d ms\n", clock()-t);
+		printf("kernel call time: %lf s\n", (clock()-t) / (double)CLOCKS_PER_SEC);
 		safeCudaCall(cudaMemcpy(dis, dev_dis, sizeof(float)*(doc_num*k), cudaMemcpyDeviceToHost));
 		vector<int> sels;
 		for(int i=0;i<doc_num;i++) {

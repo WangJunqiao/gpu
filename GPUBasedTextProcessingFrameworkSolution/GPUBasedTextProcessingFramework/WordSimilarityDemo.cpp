@@ -183,7 +183,7 @@ int word_similarity_test(int argc, char **argv) {
 		gpu_core_time = ins->core_time;
 	}
 
-	printf("cpu_time = %d ms, gpu_time = %d ms, speed up = %.2lf\n", cpu_core_time, gpu_core_time, cpu_core_time / (double)gpu_core_time);
+	printf("cpu_time = %lf s, gpu_time = %lf s, speed up = %.2lf\n", cpu_core_time / (double)CLOCKS_PER_SEC, gpu_core_time / (double)CLOCKS_PER_SEC, cpu_core_time / (double)gpu_core_time);
 
 	return 0;
 }

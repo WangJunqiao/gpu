@@ -331,7 +331,7 @@ void DocDupDetectorGPU::useMethod1(int doc_num, char **d_hashstrs, int *d_hashst
 		int t = clock();
 		calcDupsByGpu<<<MAX_BLOCKS, 1>>>(d_hashstrs, d_hashstrs_length, d_startId, d_endedId, b1, b2, doc_num, d_ans_buf, d_ans_len);
 		cudaDeviceSynchronize();
-		printf("time used: %d ms\n", clock()-t);
+		printf("time used: %lf s\n", (clock()-t) / (double)CLOCKS_PER_SEC);
 
 		t = clock();
 		safeCudaCall(cudaMemcpy(h_ans_len, d_ans_len, sizeof(int) * MAX_BLOCKS, cudaMemcpyDeviceToHost));
@@ -346,10 +346,10 @@ void DocDupDetectorGPU::useMethod1(int doc_num, char **d_hashstrs, int *d_hashst
 				if(id1 > id2) candies[id2].push_back(id1);
 			}
 		}
-		printf("data copy and insert: %d ms\n", clock()-t);
+		printf("data copy and insert: %lf s\n", (clock()-t) / (double)CLOCKS_PER_SEC);
 	}
 
-	printf("calculateDups time: %d ms\n", clock()-ttt);
+	printf("calculateDups time: %lf s\n", (clock()-ttt) / (double)CLOCKS_PER_SEC);
 }
 
 void DocDupDetectorGPU::useMethod3(int doc_num, char **d_hashstrs, int *d_hashstrs_length, int *d_startId, int *d_endedId) {
@@ -364,7 +364,7 @@ void DocDupDetectorGPU::useMethod3(int doc_num, char **d_hashstrs, int *d_hashst
 		safeCudaCall(cudaMemset(char_map, 0, sizeof(char)*(MAX_BLOCKS * MAX_DUP_DOCUMENTS)));
 		calcDupsByGpu3<<<MAX_BLOCKS, MAX_THREADS_PER_BLOCK>>>(d_hashstrs, d_hashstrs_length, d_startId, d_endedId, b1, b2, doc_num, char_map, edit_dis);
 		cudaDeviceSynchronize();
-		LOG(logger, "time used: %d ms", clock()-t);
+		LOG(logger, "time used: %lf s", (clock()-t) / (double)CLOCKS_PER_SEC);
 
 		t = clock();
 		safeCudaCall(cudaMemcpy(h_char_map, char_map, sizeof(char) * MAX_BLOCKS * MAX_DUP_DOCUMENTS, cudaMemcpyDeviceToHost));
@@ -377,10 +377,10 @@ void DocDupDetectorGPU::useMethod3(int doc_num, char **d_hashstrs, int *d_hashst
 				if(id1 > id2) candies[id2].push_back(id1);
 			}
 		}
-		LOG(logger, "data copy and insert: %d ms", clock()-t);
+		LOG(logger, "data copy and insert: %lf s", (clock()-t) / (double)CLOCKS_PER_SEC);
 	}
 	free(h_char_map);
-	LOG(logger, "calculateDups time: %d ms", clock()-ttt);
+	LOG(logger, "calculateDups time: %lf s", (clock()-ttt) / (double)CLOCKS_PER_SEC);
 }
 
 void DocDupDetectorGPU::calculate_dups() {
@@ -449,7 +449,7 @@ void DocDupDetectorGPU::calculate_dups() {
 	core_time = clock() - ttt;
 	LOG(logger, "hashstrs average length: %lf, max length: %lf", sumL / doc_num, maxL);
 	LOG(logger, "content max length: %d", maxLD);
-	LOG(logger, "calculateDups total time: %d ms", clock()-ttt);
+	LOG(logger, "calculateDups total time: %lf s", (clock()-ttt) / (double)CLOCKS_PER_SEC);
 }
 
 vector<int> DocDupDetectorGPU::get_candidate_dup_docs(int did) {
