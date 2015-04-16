@@ -53,7 +53,7 @@ void IDFManager::calc_idf(DocumentSource *doc_src, const int n, const char* out_
 		return;
 	}
 
-	int total_doc_num = 0;
+	int total_doc_num = 0, threshold = 1;
 	unordered_map<string, int> docnum_per_word;
 	map<string, int> word_count;
 	set<string> s_stop_words;
@@ -76,7 +76,10 @@ void IDFManager::calc_idf(DocumentSource *doc_src, const int n, const char* out_
 			word_is_in_doc[c] = true;
 		}
 		total_doc_num++;
-		if (total_doc_num % 1000 == 0)LOG(logger, "processed %d documents.", total_doc_num);
+		if (total_doc_num == threshold) {
+			LOG(logger, "processed %d documents.", total_doc_num);
+			threshold *= 2;
+		}
 	}
 	if (n < word_count.size()) {
 		map<string, int>::iterator it;
@@ -88,8 +91,8 @@ void IDFManager::calc_idf(DocumentSource *doc_src, const int n, const char* out_
 		reverse(count_word.begin(), count_word.end());
 		count_word.resize(n);
 		int count = 0;
-		FILE *fp = fopen(out_idf_file, "w");
 		LOG(logger, "%s", "begin to save word_idf:");
+		FILE *fp = fopen(out_idf_file, "w");
 		vector<pair<int, string> >::iterator v_it;
 		unordered_map<string, int>::iterator un_it;
 		for (v_it = count_word.begin(); v_it != count_word.end(); v_it++) {
