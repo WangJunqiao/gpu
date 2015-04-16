@@ -39,16 +39,13 @@ map<int,string> document;
 class CodeforcesDataSource : public DocumentSource {
 public:
 	string dir;
-	//_finddata_t fileinfo; 
 	
     DIR* files;
     string next_file_name;
 
     map<int, string> document;
 	map<int, vector<int> > afterRefineCandPairs;
-	int flag;
 	int number;
-	intptr_t iFind;
 
 	bool openSource();
 	void set_files_directory(string dir) {
@@ -61,7 +58,6 @@ public:
 
 	}
 
-	void setDocument(int id,string hash_value);
 	string getDocumentName(int id);
 	~CodeforcesDataSource();
 };
@@ -70,27 +66,13 @@ public:
 //implement of class CodeforcesDataSource
 
 bool CodeforcesDataSource::openSource() {
-	// string dir="";
 	files = opendir(dir.c_str());
-    /*if (_access(dir.c_str(), 06) == -1)  
-	{  
-		cerr << "error: directory does not exist." << endl;  
-		exit(-1);  
-	} */ 
+ 
 
-	if (dir.at(dir.length() - 1) != '\\')  
-	{  
-		dir += '\\';  
+	if (dir.at(dir.length() - 1) != '\\') {  
+		dir += "/";  
 	}  
-/*
-	if (_chdir(dir.c_str()) != 0)  
-	{  
-		cerr << "error: function _chdir() failed.";  
-		exit(-1);  
-	}  
-	memset(&fileinfo, 0x0, sizeof(fileinfo));
-	flag=0;
-	number=0;*/
+
 	return true;
 }
 
@@ -106,18 +88,6 @@ bool CodeforcesDataSource::hasNext() {
         }
     }
     return false;
-    /*
-    if(flag==0){
-		iFind = _findfirst("*.txt", &fileinfo);
-		flag=1;
-		if(iFind!=-1)
-			return true;
-	}
-	else{
-		if(_findnext(iFind, &fileinfo)==0)
-			return true;
-	}
-	return false; */
 }
 
 string CodeforcesDataSource::getNextDocument() {
@@ -145,9 +115,7 @@ string CodeforcesDataSource::getNextDocument() {
 CodeforcesDataSource::~CodeforcesDataSource() {
 
 }
-void CodeforcesDataSource::setDocument(int id,string hash_value){
-	document[id] = hash_value;
-}
+
 string CodeforcesDataSource::getDocumentName(int id){
 	return document[id];
 }
