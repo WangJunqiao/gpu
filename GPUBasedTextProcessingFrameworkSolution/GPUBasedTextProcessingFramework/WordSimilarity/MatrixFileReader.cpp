@@ -17,14 +17,14 @@ MatrixFileReader::MatrixFileReader(Logger *logger) {
 
 vector<int> MatrixFileReader::init_reader(const char *matrix_file, const char *word_file) {
 	LOG(logger, "%s", "Initialize reader...");
-	
+	LOG(logger, "matrix_file = %s, word_file = %s", matrix_file, word_file);
 	FILE *fp = fopen(word_file, "r");
 	int id, num;
 	LL p;
 	vector<int> ret;
 	while(fscanf(fp, "%d", &id)!=EOF) {
 		assert(id == pos.size());
-		fscanf(fp, "%*s %I64d %d", &p, &num);
+		fscanf(fp, "%*s %lld %d", &p, &num);
 		ret.push_back(num);
 		pos.push_back(p);
 	}

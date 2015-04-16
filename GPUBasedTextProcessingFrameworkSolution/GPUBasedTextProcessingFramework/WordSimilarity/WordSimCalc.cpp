@@ -192,7 +192,7 @@ void WordSimCalculator::calc_mutual_info_matrix(DocumentSource *doc_src, int win
 // 	}
 
 	LOG(logger, "word_tot = %lld", word_tot);
-
+    LOG(logger, "maxtrix_file_name = %s", get_matrix_file_name(1).c_str());
 	FILE *fout = fopen(get_matrix_file_name(1).c_str(), "wb");
 	for(int i=0;i<W;i++) {
 		co_oc[i] = 0;

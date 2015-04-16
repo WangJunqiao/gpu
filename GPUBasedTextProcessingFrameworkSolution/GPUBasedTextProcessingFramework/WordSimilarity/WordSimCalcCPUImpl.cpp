@@ -28,11 +28,14 @@ void CPUWordSimCalculator::calc_similarity_matrix() {
 		);
 
 	//return;
-
+    LOG(logger, "matrix_file_name2 = %s", get_matrix_file_name(2).c_str());
 	FILE *fp = fopen(get_matrix_file_name(2).c_str(), "wb");
-	clock_t t = clock();
+	
+    clock_t t = clock();
 	for(int id1=0;id1<(int)v.size();id1++) {
-		int *i1, *i2;
+		if(id1 % 1000 == 0)
+			LOG(logger, "vector %d completed, time used: %d ms", id1, (int)(clock()-t));
+        int *i1, *i2;
 		float *f1, *f2;
 		reader.load_data(id1);
 		i1 = reader.r_iptr[id1];
@@ -69,9 +72,7 @@ void CPUWordSimCalculator::calc_similarity_matrix() {
 			fwrite(&id2, sizeof(int), 1, fp);
 			fwrite(&res, sizeof(float), 1, fp);
 		}
-		if(id1 % 1000 == 0)
-			LOG(logger, "vector %d completed, time used: %d ms", id1, (int)(clock()-t));
-	}
+    }
 	fclose(fp);
 	//return;
 

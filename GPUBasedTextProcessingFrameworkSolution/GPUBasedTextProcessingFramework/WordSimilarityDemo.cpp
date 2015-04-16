@@ -12,6 +12,7 @@
 
 #include <sys/types.h>
 #include <dirent.h> 
+#include <unistd.h>
 
 #include "./WordSimilarity/MatrixFileReader.h"
 #include "./WordSimilarity/WordSimCalc.h"
@@ -110,37 +111,51 @@ int word_similarity_test(int argc, char **argv) {
 	int mask = 0;
 	string output_dir = ".";
 	int max_doc = 6000000; 
-	for (int i = 2; i < argc; i += 2) {
+	for (int i = 2; i < argc;) {
 		if (strcmp(argv[i], "-log") == 0 && i + 1 < argc) {
 			file_logger = new Logger(argv[i + 1], false);
+            i += 2;
 		} else if (strcmp(argv[i], "-no_cal_mi") == 0) {
 			no_cal_mi = true;
+            i ++;
 		} else if (strcmp(argv[i], "-win_size") == 0 && i + 1 < argc) {
 			win_size = atoi(argv[i + 1]);
+            i += 2;
 		} else if (strcmp(argv[i], "-top_words") == 0 && i + 1 < argc) {
 			top_words = atoi(argv[i + 1]);
+            i += 2;
 		} else if (strcmp(argv[i], "-corpus") == 0 && i + 1 < argc) {
 			wiki_src = new WikipediaDataSource(argv[i + 1]);
+            i += 2;
 		} else if (strcmp(argv[i], "-cpu") == 0) {
 			mask |= 1;
+            i ++;
 		} else if (strcmp(argv[i], "-gpu") == 0) {
 			mask |= 2;
+            i ++;
 		} else if (strcmp(argv[i], "-output_dir") == 0 && i + 1 < argc) {
 			output_dir = argv[i + 1];
+            i += 2;
 		} else if (strcmp(argv[i], "-max_doc") == 0 && i + 1 < argc) {
 			max_doc = atoi(argv[i + 1]);
+            i += 2;
 		} else {
 			print_usage();
 		}
 	}
 	assert(output_dir.back() != '/' && output_dir.back() != '\\');
-	assert(opendir(output_dir.c_str()) != NULL);
+	if (opendir(output_dir.c_str()) == NULL) {
+        system((string("mkdir -p ") + output_dir.c_str()).c_str());
+    }
 	Logger *logger = new Logger(stdout, file_logger);
 
+    LOG(logger, "mask = %d", mask);
 	WordSimCalculator *ins;
 
 	clock_t cpu_core_time = 1, gpu_core_time = 1;
 	
+    system((string("mkdir -p ") + output_dir + "/cpu/").c_str());
+    system((string("mkdir -p ") + output_dir + "/gpu/").c_str());
 	if (mask & 1) {
 		ins = new CPUWordSimCalculator(logger, output_dir + "/cpu/", top_words);
 		if (!no_cal_mi) {
