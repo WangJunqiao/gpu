@@ -121,46 +121,32 @@ bool CodeforcesDataSource::hasNext() {
 }
 
 string CodeforcesDataSource::getNextDocument() {
-//	string filePath(dir+fileinfo.name);
     string filePath(dir + next_file_name);
-    char file[100];
-	int i;
-	for(i=0;i<filePath.length();i++)
-		file[i]=filePath[i];
-	file[i]='\0';
-	char name[100];
-	for(i=strlen(file)-1;i>=0;i--)
-		if(file[i]=='\\')
-			break;
-	int k=0;
-	for(int j=i+1;j<strlen(file);j++)
-		name[k++]=file[j];
-	name[k]='\0';
-	char *content;
-	string doc_content; 
-	FILE *fp;
-	if((fp=fopen(file,"rb"))==NULL){
-		printf("could not open the file!\n");
+	
+	printf("file = %s\n", filePath.c_str());
+
+	static char content[1000000];
+	FILE *fp = NULL;
+	if((fp = fopen(filePath.c_str(), "rb")) == NULL){
+		printf("could not open file - %s!\n", filePath.c_str());
 	}
 	long lsize;
-	fseek(fp,0,SEEK_END);
-	lsize=ftell(fp);
-	fseek(fp,0,SEEK_SET);
-	content=(char*)malloc(sizeof(char)*(lsize+1));
-	size_t result;
-	result=fread(content,lsize,1,fp);
-	content[lsize]='\0';
+	fseek(fp, 0, SEEK_END);
+	lsize = ftell(fp);
+
+	fseek(fp, 0, SEEK_SET);
+	fread(content, sizeof(char), lsize, fp);
+	content[lsize] = '\0';
 	fclose(fp);
-	doc_content=string(content);
-	string str(name);
-	document[number++]=str;
-	return doc_content;
+	
+	document[number ++] = next_file_name;
+	return content;
 }
 CodeforcesDataSource::~CodeforcesDataSource() {
 
 }
 void CodeforcesDataSource::setDocument(int id,string hash_value){
-	document[id]=hash_value;
+	document[id] = hash_value;
 }
 string CodeforcesDataSource::getDocumentName(int id){
 	return document[id];
