@@ -179,8 +179,10 @@ int DocDupDetectorCPU::check_common_substring(const char* hash_value1, const cha
 		return 0;
 }
 
+static double average_len;
 void DocDupDetectorCPU::initialize() {
 	doc_id = 0;
+	average_len = 0.0;
 	M.clear();
 	docs.clear();
 	allDupPair.clear();
@@ -196,13 +198,16 @@ void DocDupDetectorCPU::add_document(string doc){
 	LOG(logger, "%d %s", doc_id, hash_value);
 	docs[doc_id] = doc;
 	M[doc_id++]=hash_value;
+	average_len += strlen(hash_value);
 	//	return id;
 }
 
 void DocDupDetectorCPU::calculate_dups(){
 	clock_t tt = clock();
 	LOG(logger, "%s", "Begin calculate candidate dups");
+	LOG(logger, "average_len = %lf", average_len / M.size());
 	map<int,string>::iterator iter,next;
+	int threshold = 1, cnt = 0;
 	for(iter=M.begin();iter!=M.end();iter++){
 		const char* source_hash=(iter->second).c_str();
 		int id=iter->first;
@@ -214,7 +219,11 @@ void DocDupDetectorCPU::calculate_dups(){
 			if(score(source_hash, target_hash) >= 60)
 				(allDupPair[id]).push_back(next->first);
 		}
-		LOG(logger, "calculate_candy_dups %d completely", iter->first);
+		cnt ++;
+		if (cnt == threshold) {
+			threshold *= 2;
+			LOG(logger, "calculate_candy_dups %d completely", iter->first);
+		}
 	}
 	core_time = clock() - tt;
 	LOG(logger, "Calculate candidate dups completely, time used = %d ms", clock()-tt);

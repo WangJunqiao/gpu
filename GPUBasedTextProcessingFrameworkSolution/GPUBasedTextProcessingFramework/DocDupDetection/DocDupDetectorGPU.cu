@@ -47,11 +47,11 @@ static vector<int> real_dups[MAX_DUP_DOCUMENTS];
 
 static vector<pair<int, int> > order_by_length;
 
-
+static double average_len;
 void DocDupDetectorGPU::initialize() {
 	contents_buffer.clear();
 	hashstrs_buffer.clear();
-
+	average_len = 0.0;
 	for(int i=0;i<MAX_DUP_DOCUMENTS;i++) {
 		candies[i].clear();
 		real_dups[i].clear();
@@ -93,7 +93,8 @@ void DocDupDetectorGPU::add_document(string doc) {
 	strcpy(h, code.c_str());
 
 	//cout<<code<<endl;
-	printf("doc_id = %d\n", (int)contents_buffer.size());
+	printf("doc_id = %d, hash_value = %s\n", (int)contents_buffer.size(), code.c_str());
+	average_len += code.length();
 
 	contents_buffer.push_back(p);
 	contents_length.push_back(strlen(p));
@@ -384,6 +385,8 @@ void DocDupDetectorGPU::useMethod3(int doc_num, char **d_hashstrs, int *d_hashst
 }
 
 void DocDupDetectorGPU::calculate_dups() {
+	LOG(logger, "%s", "Begin calculate doc dups by GPU.");
+	LOG(logger, "average_len = %lf", average_len / contents_buffer.size());
 	int ttt = clock();
 	int doc_num = contents_buffer.size();
 	order_by_length.clear();
