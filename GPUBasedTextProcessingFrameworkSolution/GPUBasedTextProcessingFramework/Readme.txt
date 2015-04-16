@@ -4,4 +4,5 @@ Use command(make) to generate GPU-exe. Use command(make clean) to clean the inte
 Sample command to run word similarity calculation:
 ./GPU-exe -word_sim -win_size 5 -top_words 10000 -corpus /mnt/sdb1/dd/gpu/data/wiki_plain_txt -cpu -gpu -output_dir /mnt/sdb1/dd/gpu/data/wordsim-out -log /mnt/sdb1/dd/gpu/data/log.txt -max_doc 500000
 
-
+Sample command to run document duplication detection:
+./GPU-exe -doc_dup -files_dir /mnt/sdb1/dd/codeforce-code -cpu -gpu -max_doc 10000
