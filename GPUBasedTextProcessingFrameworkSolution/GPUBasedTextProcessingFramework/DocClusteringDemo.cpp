@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <cuda.h>
+#include <string.h>
 
 #include "./DocClustering/KMeansClustering.h"
 #include "./DataSource/WikipediaDataSource.h"
@@ -61,7 +62,8 @@ int doc_clustering_test(int argc, char** argv) {
 			file_logger = new Logger(argv[i + 1], false);
 			i += 2;
 		} else if (strcmp(argv[i], "-calc_idf") == 0 && i + 2 < argc) {
-			top_words = atoi(argv[i + 1]);
+            calc_idf = true;
+            top_words = atoi(argv[i + 1]);
 			idf_doc_src = argv[i + 2];
 			i += 3;
 		} else if (strcmp(argv[i], "-idf_file") == 0 && i + 1 < argc) {
