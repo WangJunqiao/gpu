@@ -64,9 +64,9 @@ void IDFManager::calc_idf(DocumentSource *doc_src, const int n, const char* out_
 	while(doc_src->hasNext()) {
 		map<string, bool> word_is_in_doc;
 		string s  = doc_src->getNextDocument();
-		char c[1000];
+		static char c[100000];
 		int len, t_len = 0;
-		while(sscanf(s.c_str() + t_len, "%s%n", c, &len) != -1){
+		while(sscanf(s.data() + t_len, "%s%n", c, &len) != -1){
 			t_len += len;
 			_clean_word(c);
 			stem_it(c);
