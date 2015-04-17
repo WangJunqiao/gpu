@@ -114,7 +114,7 @@ int doc_clustering_test(int argc, char** argv) {
 	if (mask & 1) {
 		WikipediaDataSource *wiki_src = new WikipediaDataSource(corpus);
 		wiki_src->set_max_docs(doc_num * 3);
-		KMeansClusteringGPU *cpu = new KMeansClusteringGPU(&logger, &idf_manager);
+		KMeansClusteringGPU *cpu = new KMeansClusteringCPU(&logger, &idf_manager);
 		cpu_time = test(cpu, wiki_src, doc_num, centroids);
 		delete cpu;
 		delete wiki_src;
@@ -124,7 +124,7 @@ int doc_clustering_test(int argc, char** argv) {
 	if (mask & 2) {
 		WikipediaDataSource *wiki_src = new WikipediaDataSource(corpus);
 		wiki_src->set_max_docs(doc_num * 3);
-		KMeansClusteringCPU *gpu = new KMeansClusteringCPU(&logger, &idf_manager);
+		KMeansClusteringCPU *gpu = new KMeansClusteringGPU(&logger, &idf_manager);
 		gpu_time = test(gpu, wiki_src, doc_num, centroids);
 		delete gpu;
 		delete wiki_src;
