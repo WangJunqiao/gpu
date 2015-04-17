@@ -61,7 +61,8 @@ void IDFManager::calc_idf(DocumentSource *doc_src, const int n, const char* out_
 	int stop_word_index = 0;
 	while (_stop_words[stop_word_index]){s_stop_words.insert(_stop_words[stop_word_index]), stop_word_index++;}
 	LOG(logger, "%s", "begin to calculate idf:");
-	while(doc_src->hasNext()) {
+	long long bad_words = 0;
+    while(doc_src->hasNext()) {
 		map<string, bool> word_is_in_doc;
 		string s  = doc_src->getNextDocument();
 		static char c[100000];
@@ -69,6 +70,10 @@ void IDFManager::calc_idf(DocumentSource *doc_src, const int n, const char* out_
 		while(sscanf(s.data() + t_len, "%s%n", c, &len) != -1){
 			t_len += len;
 			_clean_word(c);
+            if (len > 200) {
+                bad_words ++;
+                continue;
+            }
 			stem_it(c);
 			if(strcmp(c, "")==0 || s_stop_words.find(c) != s_stop_words.end() ||
 				word_is_in_doc[c] != 0)continue;
@@ -83,6 +88,7 @@ void IDFManager::calc_idf(DocumentSource *doc_src, const int n, const char* out_
 		}
 	}
     LOG(logger, "%s", "Read all docs end.");
+    LOG(logger, "bad words number = %lld\n", bad_words);
 	if (n < word_count.size()) {
 		map<string, int>::iterator it;
 		vector<pair<int, string> > count_word;
@@ -321,7 +327,7 @@ void IDFManager::_calc_tfidf_without_idf(DocumentSource *doc_src, const char *ou
 
 void IDFManager::_clean_word(char *c) {
 	int len = strlen(c);
-	assert(len > 0 && len < 200);
+//	assert(len > 0 && len < 200);
 	int i = 0;
 	for (int j = 0; j < len; j++) {
 		if(c[j] >= 'a' && c[j] <= 'z')c[i++] = c[j];
