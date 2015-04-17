@@ -36,7 +36,7 @@ void KMeansClusteringGPU::add_document(const char *content) {
 			tot_words ++;
 		}
 	}
-	LOG(logger, "tot words: %d", tot_words);
+	//LOG(logger, "tot words: %d", tot_words);
 	for(int i=0;i<dimensions;i++) {
 		f[i] = f[i]/tot_words * idf_manager->get_word_idf(i);
 	}

@@ -12,25 +12,29 @@
 #include "./DocClustering/KMeansClusteringCPU.h"
 #include "./DocClustering/KMeansClusteringGPU.h"
 
-static void test(KMeansClustering *cluAlgo, DocumentSource *doc_src, int doc_num, int c) {
+static clock_t test(KMeansClustering *cluAlgo, DocumentSource *doc_src, int doc_num, int c) {
 	doc_src->openSource();
 
 	cluAlgo->initilize();
 	for(int i=0;i < doc_num && doc_src->hasNext();i++) {
 		if(i%100 == 0) {
-			printf("adding document %d\n", i+1);
+			// printf("adding document %d\n", i+1);
 		}
 		cluAlgo->add_document(doc_src->getNextDocument().c_str());
 	}
+	printf("Add %d docs\n", doc_num);
 // 	vector<int> ids;
 // 	for(int i=130;i<160;i++) ids.push_back(i);
 // 	cluAlgo->set_init_centroids(ids);
+	clock_t ttt = clock();
 	cluAlgo->run_clustering(c);
+	clock_t ret = clock() - ttt;
 
 	cluAlgo->print_result();
 	cluAlgo->destroy();
 
 	doc_src->closeSource();
+	return ret;
 }
 
 static void print_usage() {
@@ -103,26 +107,30 @@ int doc_clustering_test(int argc, char** argv) {
 		idf_manager.calc_idf(doc_src, top_words, idf_file.c_str());
 	}
 
-	WikipediaDataSource *wiki_src = new WikipediaDataSource(corpus);
-	wiki_src->set_max_docs(doc_num * 2);
-	
 	Logger logger(stdout, file_logger);
+	clock_t cpu_time = 1, gpu_time = 1;
 
 	// test in cpu
 	if (mask & 1) {
+		WikipediaDataSource *wiki_src = new WikipediaDataSource(corpus);
+		wiki_src->set_max_docs(doc_num * 3);
 		KMeansClusteringGPU *cpu = new KMeansClusteringGPU(&logger, &idf_manager);
-		test(cpu, wiki_src, doc_num, centroids);
+		cpu_time = test(cpu, wiki_src, doc_num, centroids);
 		delete cpu;
+		delete wiki_src;
 	}
 
 	// test in gpu
 	if (mask & 2) {
+		WikipediaDataSource *wiki_src = new WikipediaDataSource(corpus);
+		wiki_src->set_max_docs(doc_num * 3);
 		KMeansClusteringCPU *gpu = new KMeansClusteringCPU(&logger, &idf_manager);
-		test(gpu, wiki_src, doc_num, centroids);
+		gpu_time = test(gpu, wiki_src, doc_num, centroids);
 		delete gpu;
+		delete wiki_src;
 	}
 	
-
+	printf("cpu_time = %lf s, gpu_time = %lf s, speed up: %lf\n", cpu_time / (double)CLOCKS_PER_SEC, gpu_time / (double)CLOCKS_PER_SEC, cpu_time / (double)gpu_time);
 // 	if(gpu->clusters != cpu->clusters) {
 // 		puts("Wrong!!!!!!!!"); 
 // 	} else {
