@@ -221,7 +221,7 @@ void KMeansClusteringGPU::run_clustering(int k) {
 	float** darr = (float**) malloc(sizeof(float*) * doc_num); //freed
 	for(int i=0;i<doc_num;i++) {
 		float *dev_f;
-		LOG(logger, "i = %d", i);
+		//LOG(logger, "i = %d", i);
 		safeCudaCall(cudaMalloc(&dev_f, sizeof(float) * dimensions)); //freed
 		safeCudaCall(cudaMemcpy(dev_f, doc_vecs[i], sizeof(float)*dimensions, cudaMemcpyHostToDevice));
 		darr[i] = dev_f;
