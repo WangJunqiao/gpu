@@ -103,6 +103,7 @@ int doc_clustering_test(int argc, char** argv) {
 	}
 
 	WikipediaDataSource *wiki_src = new WikipediaDataSource(corpus);
+	wiki_src->set_max_docs(doc_num * 2);
 	
 	Logger logger(stdout, file_logger);
 
