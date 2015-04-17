@@ -1,5 +1,6 @@
 #include "IDFManager.h"
 #include <string.h>
+#include <assert.h>
 
 void IDFManager::calc_idf(DocumentSource *doc_src, const char* out_idf_file) {
 	if(!doc_src->openSource()){
@@ -320,6 +321,7 @@ void IDFManager::_calc_tfidf_without_idf(DocumentSource *doc_src, const char *ou
 
 void IDFManager::_clean_word(char *c) {
 	int len = strlen(c);
+	assert(len > 0 && len < 200);
 	int i = 0;
 	for (int j = 0; j < len; j++) {
 		if(c[j] >= 'a' && c[j] <= 'z')c[i++] = c[j];
