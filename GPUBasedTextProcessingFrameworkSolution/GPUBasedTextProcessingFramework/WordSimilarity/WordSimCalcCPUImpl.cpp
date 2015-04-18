@@ -34,7 +34,7 @@ void CPUWordSimCalculator::calc_similarity_matrix() {
     clock_t t = clock();
 	for(int id1=0;id1<(int)v.size();id1++) {
 		if(id1 % 1000 == 0)
-			LOG(logger, "vector %d completed, time used: %d ms", id1, (int)(clock()-t));
+			LOG(logger, "vector %d completed, time used: %lf s", id1, (clock()-t) / (double)CLOCKS_PER_SEC);
         int *i1, *i2;
 		float *f1, *f2;
 		reader.load_data(id1);
