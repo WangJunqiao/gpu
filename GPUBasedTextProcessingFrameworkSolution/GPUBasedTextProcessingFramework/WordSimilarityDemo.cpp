@@ -63,6 +63,7 @@ static void check() {
 	MatrixFileReader reader2(NULL);
 	reader2.init_reader(matrix_file2.c_str(), word_file.c_str());
 
+    int threshold = 1000;
 	for(int i=0;reader2.load_data(i);i++) {
 		int id1 = i, id2;
 		int *id = reader2.r_iptr[id1];
@@ -79,8 +80,9 @@ static void check() {
 				//	printf("%d-%d right\n", id1, id2);
 			}
 		}
-		if(i%1000 == 0) {
+		if(i == threshold) {
 			printf("check %d successfully\n", i);
+            threshold *= 2;
 		}
 	}
 

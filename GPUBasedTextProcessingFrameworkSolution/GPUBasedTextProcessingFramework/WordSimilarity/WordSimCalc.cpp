@@ -101,7 +101,7 @@ void WordSimCalculator::find_top_words(DocumentSource *doc_src) {
 	HashMapSI counter;
 
 	doc_src->openSource();
-	int line = 0;
+	int line = 0, threshold = 10000;
 	while(doc_src->hasNext()) {
 		istringstream sin(doc_src->getNextDocument());
 		string word;
@@ -113,8 +113,9 @@ void WordSimCalculator::find_top_words(DocumentSource *doc_src) {
 			counter[word] ++;
 		}
 		line++;
-		if(line%10000==0) {
+		if (line == threshold) {
 			LOG(logger, "%d documents processed.", line);
+            threshold *= 2;
 		}
 	}
 	doc_src->closeSource();
@@ -148,7 +149,7 @@ void WordSimCalculator::calc_mutual_info_matrix(DocumentSource *doc_src, int win
 	long long co_oc_s = 0;
 
 	doc_src->openSource();
-	int line = 0, max_size = 0;	
+	int line = 0, max_size = 0, threshold = 10000;	
 	long long word_tot = 0;
 	while(doc_src->hasNext()) {
 		istringstream sin(doc_src->getNextDocument());
@@ -174,9 +175,10 @@ void WordSimCalculator::calc_mutual_info_matrix(DocumentSource *doc_src, int win
 		}
 
 		line++;
-		if (line%10000 == 0) {
+		if (line == threshold) {
 			LOG(logger, "line = %d, max_size = %d", line, max_size);
-		}
+            threshold *= 2;
+        }
 		//if(line>1000000) break;
 	}
 
@@ -279,6 +281,7 @@ void WordSimCalculator::rebuild_triples(int order1, int order2) {
 	LOG(logger, "rebuild %d pairs", cnt);
 
 	fp = fopen(get_matrix_file_name(order2).c_str(), "wb");
+    int threshold = 1000;
 	for(int i=0;i<word_id.size();i++) {
 		vector<pair<int, float> > vif(sims[i]->begin(), sims[i]->end());
 		int num = vif.size();
@@ -294,9 +297,10 @@ void WordSimCalculator::rebuild_triples(int order1, int order2) {
 			fwrite(&vif[j].first, sizeof(int), 1, fp);
 			fwrite(&vif[j].second, sizeof(float), 1, fp);
 		}
-		if(i%1000 == 0) {
+		if(i == threshold) {
 			LOG(logger, "rebuild %d", i);
-		}
+            threshold *= 2;
+        }
 	}
 	fclose(fp);
 
