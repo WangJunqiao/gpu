@@ -33,7 +33,7 @@ public:
 	/// @param[in] result_dir: the directory we place the result data.
 	/// @param[in] top_words_num: the number of top appeared words we need to analysis.
 	/// @return NULL
-	WordSimCalculator(Logger *logger, const string &result_dir, int top_words_num);
+	WordSimCalculator(Logger *logger, const string &root_dir, const string &result_dir, int top_words_num, int win_size);
 
 	/// @brief Calculate the first order of the word similarity matrix.
 	/// @param[in] doc_src: The document source we will use to calculate the first order matrix. In order to ensure the 
@@ -68,7 +68,7 @@ public:
 	2 she 32 2
 	*/
 	/// @return NULL
-	void calc_mutual_info_matrix(DocumentSource *doc_src, int win_size);
+	void calc_mutual_info_matrix(DocumentSource *doc_src);
 	/// @brief According to first order matrix, calculate the second order similarity matrix.
 	/// @param[in] order: The current order of the matrix. 
 	/// For example, order = 1, then the structure of matrix_file2 is same as matrix_file1.
@@ -93,8 +93,8 @@ protected:
 	string get_matrix_file_name(int order);
 
 	Logger *logger;
-	int top_words_num;
-	string result_dir;
+	int top_words_num, win_size;
+	string root_dir, result_dir;
 private:
 	void find_top_words(DocumentSource *doc_src);
 	DISALLOW_COPY_AND_ASSIGN(WordSimCalculator);

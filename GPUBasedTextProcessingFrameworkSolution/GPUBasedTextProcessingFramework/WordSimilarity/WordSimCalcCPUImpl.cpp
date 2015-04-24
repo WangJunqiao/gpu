@@ -8,8 +8,8 @@
 using namespace std;
 
 
-CPUWordSimCalculator::CPUWordSimCalculator(Logger *logger, const string &result_dir, int top_words_num) 
-	: WordSimCalculator(logger, result_dir, top_words_num) {
+CPUWordSimCalculator::CPUWordSimCalculator(Logger *logger, const string &root_dir, const string &result_dir, int top_words_num, int win_size) 
+	: WordSimCalculator(logger, root_dir, result_dir, top_words_num, win_size) {
 		//this->WordSimCalculator::WordSimCalculator(logger, matrix_file, matrix_file2, word_file);
 }
 
@@ -32,9 +32,12 @@ void CPUWordSimCalculator::calc_similarity_matrix() {
 	FILE *fp = fopen(get_matrix_file_name(2).c_str(), "wb");
 	
     clock_t t = clock();
+	int two = 1;
 	for(int id1=0;id1<(int)v.size();id1++) {
-		if(id1 % 1000 == 0)
+		if(id1 == two) {
 			LOG(logger, "vector %d completed, time used: %lf s", id1, (clock()-t) / (double)CLOCKS_PER_SEC);
+			two *= 2;
+		}
         int *i1, *i2;
 		float *f1, *f2;
 		reader.load_data(id1);
@@ -80,6 +83,5 @@ void CPUWordSimCalculator::calc_similarity_matrix() {
 
 	rebuild_triples(2, 2);
 
-	
 	//printf("dddddddddddddddddddddddddddddddddddd\n");
 }

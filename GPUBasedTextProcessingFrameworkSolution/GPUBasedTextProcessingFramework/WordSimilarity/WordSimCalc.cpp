@@ -17,24 +17,32 @@
 using namespace std;
 
 
-WordSimCalculator::WordSimCalculator(Logger *logger, const string &result_dir, int top_words_num) {
+WordSimCalculator::WordSimCalculator(Logger *logger, const string &root_dir, const string &result_dir, int top_words_num, int win_size) {
 	this->logger = logger;
+	this->root_dir = root_dir;
 	this->result_dir = result_dir;
 	this->top_words_num = top_words_num;
-	if(this->result_dir.back() != '/' && this->result_dir.back()!='\\') {
+	if (this->root_dir.back() != '/') {
+		this->root_dir += "/";
+	}
+	if(this->result_dir.back() != '/') {
 		this->result_dir += "/";
 	}
 }
 
 string WordSimCalculator::get_word_file_name() {
-	return this->result_dir + "word_file";
+	static char buf[555];
+	sprintf(buf, "%d-%d-word_file", top_words_num, win_size);
+	return this->root_dir + buf;
 }
 
 string WordSimCalculator::get_matrix_file_name(int order) {
 	if(order < 0) {
 		return this->result_dir + "matrix_tmp";
 	} else if (order == 1) {
-		return this->result_dir + "mutual_info_matrix";
+		static char buf[555];
+		sprintf(buf, "%d-%d-mutual_info_matrix", top_words_num, win_size);
+		return this->root_dir + buf;
 	} else if (order == 2) {
 		return this->result_dir + "similarity_matrix";
 	} else {
@@ -131,7 +139,7 @@ void WordSimCalculator::find_top_words(DocumentSource *doc_src) {
 }
 
 
-void WordSimCalculator::calc_mutual_info_matrix(DocumentSource *doc_src, int win_size) {
+void WordSimCalculator::calc_mutual_info_matrix(DocumentSource *doc_src) {
 	clock_t t = clock(), ttt = t;
 	find_top_words(doc_src);
 	int W = word_id.size();

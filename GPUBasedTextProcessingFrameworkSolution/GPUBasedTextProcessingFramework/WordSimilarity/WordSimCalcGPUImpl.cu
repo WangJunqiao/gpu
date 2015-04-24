@@ -10,8 +10,8 @@
 using namespace std;
 
 
-GPUWordSimCalculator::GPUWordSimCalculator(Logger *logger, const string &result_dir, int top_words_num) 
-	: WordSimCalculator(logger, result_dir, top_words_num){
+GPUWordSimCalculator::GPUWordSimCalculator(Logger *logger, const string &root_dir, const string &result_dir, int top_words_num, int win_size) 
+	: WordSimCalculator(logger, root_dir, result_dir, top_words_num, win_size){
 		block_num = 128;
 		thread_num = 128;
 		pairs_limit = 30000000;

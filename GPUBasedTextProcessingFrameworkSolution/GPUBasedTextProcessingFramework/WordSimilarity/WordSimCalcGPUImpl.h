@@ -29,7 +29,7 @@ public:
 	/// @param[in] result_dir: the directory we place the result data.
 	/// @param[in] top_words_num: the number of top appeared words we need to analysis.
 	/// @return NULL
-	GPUWordSimCalculator(Logger *logger, const string &result_dir, int top_words_num);
+	GPUWordSimCalculator(Logger *logger, const string &root_dir, const string &result_dir, int top_words_num, int win_size);
 
 	void calc_similarity_matrix();
 

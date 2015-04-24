@@ -99,8 +99,10 @@ static void print_usage() {
 	printf("-win_size    the scan window size, we consider [-size, size]\n");
 	printf("-no_cal_mi   No need to calculate mutual information matrix\n");
 	printf("-log         log file name, e.g. ./log.txt\n");
+	printf("-root_dir    where the word_file and mi_matrix is");
 	printf("-output_dir  output directory, e.g. D:/aaa\n");
 	printf("-max_docs    max documents, eg 6000000\n");
+	printf("-set_param   set the blocks, threads and pair_limit\n");
 	exit(0);
 }
 
@@ -111,8 +113,9 @@ int word_similarity_test(int argc, char **argv) {
 	int top_words = 200000;
 	WikipediaDataSource *wiki_src = NULL;
 	int mask = 0;
-	string output_dir = ".";
+	string root_dir = ".", output_dir = ".";
 	int max_doc = 6000000; 
+	int blocks = -1, threads = -1, pair_limits = -1;
 	for (int i = 2; i < argc;) {
 		if (strcmp(argv[i], "-log") == 0 && i + 1 < argc) {
 			file_logger = new Logger(argv[i + 1], false);
@@ -138,47 +141,61 @@ int word_similarity_test(int argc, char **argv) {
 		} else if (strcmp(argv[i], "-output_dir") == 0 && i + 1 < argc) {
 			output_dir = argv[i + 1];
             i += 2;
+		} else if (strcmp(argv[i], "-root_dir") == 0 && i + 1 < argc) {
+			root_dir = argv[i + 1];
+			i += 2;
 		} else if (strcmp(argv[i], "-max_doc") == 0 && i + 1 < argc) {
 			max_doc = atoi(argv[i + 1]);
             i += 2;
+		} else if (strcmp(argv[i], "-set_param") == 0 && i + 3 < argc) {
+			blocks = atoi(argv[i + 1]);
+			threads = atoi(argv[i + 2]);
+			pair_limits = atoi(argv[i + 3]);
+			i += 4;
 		} else {
 			print_usage();
 		}
 	}
+	assert(root_dir.back() != '/' && root_dir.back() != '\\');
 	assert(output_dir.back() != '/' && output_dir.back() != '\\');
-	if (opendir(output_dir.c_str()) == NULL) {
-        system((string("mkdir -p ") + output_dir.c_str()).c_str());
-    }
+
 	Logger *logger = new Logger(stdout, file_logger);
 
     LOG(logger, "mask = %d", mask);
-	WordSimCalculator *ins;
 
 	clock_t cpu_core_time = 1, gpu_core_time = 1;
 	
     system((string("mkdir -p ") + output_dir + "/cpu/").c_str());
     system((string("mkdir -p ") + output_dir + "/gpu/").c_str());
 	if (mask & 1) {
-		ins = new CPUWordSimCalculator(logger, output_dir + "/cpu/", top_words);
+		CPUWordSimCalculator *ins = new CPUWordSimCalculator(logger, root_dir, output_dir + "/cpu/", top_words, win_size);
 		if (!no_cal_mi) {
 			if (wiki_src == NULL) {
 				print_usage();
 			}
 			wiki_src->set_max_docs(max_doc);
-			ins->calc_mutual_info_matrix(wiki_src, win_size);
+			ins->calc_mutual_info_matrix(wiki_src);
+		} else {
+			printf("no calc mi!!\n");
 		}
 		ins->calc_similarity_matrix();
 		//check();
 		cpu_core_time = ins->core_time; 
+		delete ins;
 	}
 	if (mask & 2) {
-		ins = new GPUWordSimCalculator(logger, output_dir + "/gpu/", top_words);
+		GPUWordSimCalculator *ins = new GPUWordSimCalculator(logger, root_dir, output_dir + "/gpu/", top_words, win_size);
+		if (blocks > 0) {
+			ins->set_params(blocks, threads, pair_limits);
+		}
 		if (!no_cal_mi) {
 			if (wiki_src == NULL) {
 				print_usage();
 			}
 			wiki_src->set_max_docs(max_doc);
-			ins->calc_mutual_info_matrix(wiki_src, win_size);
+			ins->calc_mutual_info_matrix(wiki_src);
+		} else {
+			printf("no calc mi!!\n");
 		}
 		ins->calc_similarity_matrix();
 		//check();
