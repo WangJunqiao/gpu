@@ -1,5 +1,5 @@
 #!/bin/bash
-for word_num in 30000 50000 100000
+for word_num in 50000 100000
 do
     today=$(date -d now +%Y-%m-%d-%H:%M:%S)
     out_dir="/mnt/sdb1/dd/gpu/data/wordsim-out/"$word_num"-"$today

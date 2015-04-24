@@ -378,8 +378,8 @@ void DocDupDetectorGPU::calculate_dups() {
 		candies[i].clear();
 	}
 
-	//useMethod1(doc_num, d_hashstrs, d_hashstrs_length, d_startId, d_endedId);
-	useMethod3(doc_num, d_hashstrs, d_hashstrs_length, d_startId, d_endedId);
+	useMethod1(doc_num, d_hashstrs, d_hashstrs_length, d_startId, d_endedId);
+	//useMethod3(doc_num, d_hashstrs, d_hashstrs_length, d_startId, d_endedId);
 
 	core_time = clock() - ttt;
 	LOG(logger, "hashstrs average length: %lf, max length: %lf", sumL / doc_num, maxL);
