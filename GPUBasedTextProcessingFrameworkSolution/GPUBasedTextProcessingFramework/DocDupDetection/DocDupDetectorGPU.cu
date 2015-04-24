@@ -15,7 +15,7 @@
 using namespace std;
 
 
-#define MAX_DUP_DOCUMENTS 10000
+#define MAX_DOCUMENTS 200010
 #define MAX_HASH_STR_LEN 128
 
 #define MAX_DUP_HASHSTRING_LENGTH (MAX_HASH_STR_LEN + 2)   //7k
@@ -42,8 +42,8 @@ static vector <int>   contents_length;
 static vector <int>   hashstrs_length;
 //以上是original data
 
-static vector<int> candies[MAX_DUP_DOCUMENTS];
-static vector<int> real_dups[MAX_DUP_DOCUMENTS];
+static vector<int> candies[MAX_DOCUMENTS];
+static vector<int> real_dups[MAX_DOCUMENTS];
 //以上是答案
 
 static vector<pair<int, int> > order_by_length;
@@ -53,7 +53,7 @@ void DocDupDetectorGPU::initialize() {
 	contents_buffer.clear();
 	hashstrs_buffer.clear();
 	average_len = 0.0;
-	for(int i=0;i<MAX_DUP_DOCUMENTS;i++) {
+	for(int i=0;i<MAX_DOCUMENTS;i++) {
 		candies[i].clear();
 		real_dups[i].clear();
 	}
@@ -225,27 +225,27 @@ __global__ void calcDupsByGpu3(char **d_hashstrs, int *d_hashstrs_length, int *d
 		//printf("edit-dis[%d - %d] = %d\n", b1 + bid_intotal, to, dp[now][len1]);
 		if(dp[now][len2] < len2 * (1.0 - THRESHOLD) &&
 			dp[now][len2] < len1 * (1.0 - THRESHOLD)) {
-				char_map[blockId * MAX_DUP_DOCUMENTS + to] = 'y';
+				char_map[blockId * doc_num + to] = 'y';
 				//ans_buffer[bid_intotal * doc_num + ans_len[bid_intotal]++] = to;
 				//printf("debug: %d - %d\n", b1 + bid_intotal, to);
 		}
 	}
 }
 
-static char *  h_contents[MAX_DUP_DOCUMENTS];
-static int     h_contents_length[MAX_DUP_DOCUMENTS]; //内容
+static char *  h_contents[MAX_DOCUMENTS];
+static int     h_contents_length[MAX_DOCUMENTS]; //内容
 
-static char *  h_hashstrs[MAX_DUP_DOCUMENTS];
-static int     h_hashstrs_length[MAX_DUP_DOCUMENTS]; //哈希串
+static char *  h_hashstrs[MAX_DOCUMENTS];
+static int     h_hashstrs_length[MAX_DOCUMENTS]; //哈希串
 //以上是经过order_by_length转换之后的data, 值都是GPU中的地址
 
-static int h_ans_len[MAX_BLOCKS];
-static int h_ans[MAX_DUP_DOCUMENTS];
+//static int h_ans_len[MAX_BLOCKS];
+//static int h_ans[MAX_DUP_DOCUMENTS];
 
 //以上是临时数据
 
-static int startId[MAX_DUP_DOCUMENTS];
-static int endedId[MAX_DUP_DOCUMENTS];
+static int startId[MAX_DOCUMENTS];
+static int endedId[MAX_DOCUMENTS];
 
 static CudaMemoryManager<char> memo_mana_c;
 static CudaMemoryManager<int>  memo_mana_i;
@@ -288,13 +288,14 @@ void DocDupDetectorGPU::useMethod1(int doc_num, char **d_hashstrs, int *d_hashst
 void DocDupDetectorGPU::useMethod3(int doc_num, char **d_hashstrs, int *d_hashstrs_length, int *d_startId, int *d_endedId) {
 	clock_t ttt = clock();
 	EditDistT *edit_dis = memo_mana_s.gpu_malloc(MAX_THREADS * 2 * MAX_DUP_HASHSTRING_LENGTH);
-	char *char_map = memo_mana_c.gpu_malloc(MAX_BLOCKS * MAX_DUP_DOCUMENTS);
-	char *h_char_map = (char*)malloc(MAX_BLOCKS * MAX_DUP_DOCUMENTS); //freed
+
+	char *char_map = memo_mana_c.gpu_malloc(MAX_BLOCKS * doc_num);
+	char *h_char_map = (char*)malloc(MAX_BLOCKS * doc_num); //freed
 	for(int b1=0;b1<doc_num;b1+=MAX_BLOCKS) {
 		int b2 = min(b1 + MAX_BLOCKS, doc_num);
 		printf("Processing docs[%6d, %6d)......", b1, b2);
 		int t = clock();
-		safeCudaCall(cudaMemset(char_map, 0, sizeof(char)*(MAX_BLOCKS * MAX_DUP_DOCUMENTS)));
+		safeCudaCall(cudaMemset(char_map, 0, sizeof(char)*(MAX_BLOCKS * doc_num)));
 		calcDupsByGpu3<<<MAX_BLOCKS, MAX_THREADS_PER_BLOCK>>>(d_hashstrs, d_hashstrs_length, d_startId, d_endedId, b1, b2, doc_num, char_map, edit_dis);
 		cudaDeviceSynchronize();
 		LOG(logger, "time used: %lf s", (clock()-t) / (double)CLOCKS_PER_SEC);
