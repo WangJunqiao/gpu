@@ -47,7 +47,7 @@ string WordSimCalculator::get_matrix_file_name(int order) {
 	} else if (order == 2) {
 		return this->result_dir + "similarity_matrix";
 	} else {
-		logger->printf("Wrong order in function get_matrix_file_name: %d\n", order);
+		LOG(logger, "Wrong order in function get_matrix_file_name: %d\n", order);
 		exit(1);
 	}
 }
@@ -246,7 +246,7 @@ void WordSimCalculator::calc_mutual_info_matrix(DocumentSource *doc_src) {
 			fwrite(&vif[j].second, sizeof(float), 1, fout);
 		}
 	}
-	printf("max_val = %f\n", max_val);
+	LOG(logger, "max_val = %f\n", max_val);
 
 	FILE *fp = fopen(get_word_file_name().c_str(), "w");
 	vector<string> words(word_id.size(), "");
