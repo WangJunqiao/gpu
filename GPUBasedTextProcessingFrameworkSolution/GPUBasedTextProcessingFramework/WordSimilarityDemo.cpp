@@ -176,7 +176,7 @@ int word_similarity_test(int argc, char **argv) {
 			wiki_src->set_max_docs(max_doc);
 			ins->calc_mutual_info_matrix(wiki_src);
 		} else {
-			printf("no calc mi!!\n");
+			LOG(logger,"%s", "no calc mi!!");
 		}
 		ins->calc_similarity_matrix();
 		//check();
@@ -195,14 +195,14 @@ int word_similarity_test(int argc, char **argv) {
 			wiki_src->set_max_docs(max_doc);
 			ins->calc_mutual_info_matrix(wiki_src);
 		} else {
-			printf("no calc mi!!\n");
+			LOG(logger, "%s", "no calc mi!!!");
 		}
 		ins->calc_similarity_matrix();
 		//check();
 		gpu_core_time = ins->core_time;
 	}
 
-	printf("cpu_time = %lf s, gpu_time = %lf s, speed up = %.2lf\n", cpu_core_time / (double)CLOCKS_PER_SEC, gpu_core_time / (double)CLOCKS_PER_SEC, cpu_core_time / (double)gpu_core_time);
+	LOG(logger, "cpu_time = %lf s, gpu_time = %lf s, speed up = %.2lf\n", cpu_core_time / (double)CLOCKS_PER_SEC, gpu_core_time / (double)CLOCKS_PER_SEC, cpu_core_time / (double)gpu_core_time);
 
 	return 0;
 }

@@ -280,23 +280,23 @@ void GPUWordSimCalculator::calc_similarity_matrix() {
 			cudaFree(dev_jobs);
 			cudaFree(d_ans);
 			data_release_time += clock()-t;
-			puts("");
+			//puts("");
 			fflush(stdout);
 		}
 		t = clock();
 		free_cuda_memory(dev_data1, len1);
 		data_release_time += clock()-t;
 
-		printf("b1 = %d, ended.\n", b1);
+		LOG(logger, "b1 = %d, ended.\n", b1);
 	}
 
-	printf("all calc pairs = %lld\n", all_pairs);
-	printf("reader reading_time: %lf s\n", read_time / (double)CLOCKS_PER_SEC);
-	printf("GPU time: %lf s\n", gpu_time / (double)CLOCKS_PER_SEC);
-	printf("write time: %lf s\n", write_time / (double)CLOCKS_PER_SEC);
-	printf("data copy time: %lf s\n", data_copy_time / (double)CLOCKS_PER_SEC);
-	printf("data release time: %lf s\n", data_release_time / (double)CLOCKS_PER_SEC);
-	printf("tot time: %lf s\n", (clock()-tt) / (double)CLOCKS_PER_SEC);
+	LOG(logger, "all calc pairs = %lld\n", all_pairs);
+	LOG(logger, "reader reading_time: %lf s\n", read_time / (double)CLOCKS_PER_SEC);
+	LOG(logger, "GPU time: %lf s\n", gpu_time / (double)CLOCKS_PER_SEC);
+	LOG(logger, "write time: %lf s\n", write_time / (double)CLOCKS_PER_SEC);
+	LOG(logger, "data copy time: %lf s\n", data_copy_time / (double)CLOCKS_PER_SEC);
+	LOG(logger, "data release time: %lf s\n", data_release_time / (double)CLOCKS_PER_SEC);
+	LOG(logger, "tot time: %lf s\n", (clock()-tt) / (double)CLOCKS_PER_SEC);
 	fclose(fp);
 
 	core_time = clock() - ttt;

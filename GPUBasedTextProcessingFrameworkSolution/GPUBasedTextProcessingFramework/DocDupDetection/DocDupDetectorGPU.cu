@@ -93,7 +93,7 @@ void DocDupDetectorGPU::add_document(string doc) {
 	strcpy(h, code.c_str());
 
 	//cout<<code<<endl;
-	printf("doc_id = %d, hash_value = %s\n", (int)contents_buffer.size(), code.c_str());
+	LOG(logger, "doc_id = %d, hash_value = %s\n", (int)contents_buffer.size(), code.c_str());
 	average_len += code.length();
 
 	contents_buffer.push_back(p);
@@ -263,7 +263,7 @@ void DocDupDetectorGPU::useMethod1(int doc_num, char **d_hashstrs, int *d_hashst
 		int t = clock();
 		calcDupsByGpu<<<MAX_BLOCKS, 1>>>(d_hashstrs, d_hashstrs_length, d_startId, d_endedId, b1, b2, doc_num, d_ans_buf, d_ans_len);
 		cudaDeviceSynchronize();
-		printf("time used: %lf s\n", (clock()-t) / (double)CLOCKS_PER_SEC);
+		LOG(logger, "time used: %lf s\n", (clock()-t) / (double)CLOCKS_PER_SEC);
 
 		t = clock();
 		safeCudaCall(cudaMemcpy(h_ans_len, d_ans_len, sizeof(int) * MAX_BLOCKS, cudaMemcpyDeviceToHost));
@@ -278,10 +278,10 @@ void DocDupDetectorGPU::useMethod1(int doc_num, char **d_hashstrs, int *d_hashst
 				if(id1 > id2) candies[id2].push_back(id1);
 			}
 		}
-		printf("data copy and insert: %lf s\n", (clock()-t) / (double)CLOCKS_PER_SEC);
+		LOG(logger, "data copy and insert: %lf s\n", (clock()-t) / (double)CLOCKS_PER_SEC);
 	}
 
-	printf("calculateDups time: %lf s\n", (clock()-ttt) / (double)CLOCKS_PER_SEC);
+	LOG(logger, "calculateDups time: %lf s\n", (clock()-ttt) / (double)CLOCKS_PER_SEC);
 }
 
 void DocDupDetectorGPU::useMethod3(int doc_num, char **d_hashstrs, int *d_hashstrs_length, int *d_startId, int *d_endedId) {
@@ -292,7 +292,7 @@ void DocDupDetectorGPU::useMethod3(int doc_num, char **d_hashstrs, int *d_hashst
 	char *h_char_map = (char*)malloc(MAX_BLOCKS * doc_num); //freed
 	for(int b1=0;b1<doc_num;b1+=MAX_BLOCKS) {
 		int b2 = min(b1 + MAX_BLOCKS, doc_num);
-		printf("Processing docs[%6d, %6d)......", b1, b2);
+		LOG(logger, "Processing docs[%6d, %6d)......", b1, b2);
 		int t = clock();
 		safeCudaCall(cudaMemset(char_map, 0, sizeof(char)*(MAX_BLOCKS * doc_num)));
 		calcDupsByGpu3<<<MAX_BLOCKS, MAX_THREADS_PER_BLOCK>>>(d_hashstrs, d_hashstrs_length, d_startId, d_endedId, b1, b2, doc_num, char_map, edit_dis);

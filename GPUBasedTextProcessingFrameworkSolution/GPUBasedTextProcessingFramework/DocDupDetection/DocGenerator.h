@@ -1,3 +1,4 @@
+//This file is deprecated!!
 #ifndef DOCGENERATOR_H
 #define DOCGENERATOR_H
 
