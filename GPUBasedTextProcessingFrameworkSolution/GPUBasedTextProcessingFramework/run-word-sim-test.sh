@@ -12,12 +12,12 @@ run_cpu(){
     log_file=$out_dir"/result.txt"
     touch $log_file
     mi_matrix_file=$root_dir"/${1}-5-mutual_info_matrix"
-	run_code=$common_cmd" -top_words ${1}  -cpu -output_dir ${out_dir} "
+	run_code=$common_cmd" -top_words ${1}  -cpu -output_dir ${out_dir} -log ${log_file}"
 	if test -e $mi_matrix_file; then
-		$run_code=$run_code" -no_cal_mi"
+		run_code=$run_code" -no_cal_mi"
     fi
     echo $run_code
-    $run_code >$log_file
+    $run_code
 }
 
 # $1 = word_num
@@ -31,12 +31,12 @@ run_gpu(){
     log_file=$out_dir"/result.txt"
     touch $log_file
     mi_matrix_file=$root_dir"/${1}-5-mutual_info_matrix"
-	run_code=$common_cmd" -top_words ${1}  -gpu -output_dir ${out_dir} -set_param ${2} ${3} ${4}"
+	run_code=$common_cmd" -top_words ${1}  -gpu -output_dir ${out_dir} -set_param ${2} ${3} ${4} -log ${log_file}"
 	if test -e $mi_matrix_file; then
 		$run_code=$run_code" -no_cal_mi"
     fi
     echo $run_code
-    $run_code >$log_file
+    $run_code
 }
 
 for word_num in 10000 20000 50000 100000
@@ -48,7 +48,8 @@ do
 		do 
 			for pair_limit in 30000000 50000000
 			do
-				run_gpu $word_num $blocks $threads $pair_limit
+                echo "Passed"
+                #				run_gpu $word_num $blocks $threads $pair_limit
 			done
 		done
 	done
