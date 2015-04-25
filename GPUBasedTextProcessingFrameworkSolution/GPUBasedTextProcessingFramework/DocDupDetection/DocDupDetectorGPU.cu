@@ -116,7 +116,7 @@ __global__ void calcDupsByGpu(char **d_hashstrs, int *d_hashstrs_length, int *d_
 	
 	int threads = blockDim.x;
 	int thread_id = threadIdx.x;
-	if(b1 + bid_intotal >= b2) 
+	if(b1 + block_id >= b2) 
 		return;
 
 	int start = d_startId[b1 + block_id];
@@ -253,8 +253,8 @@ static char *  h_hashstrs[MAX_DOCUMENTS];
 static int     h_hashstrs_length[MAX_DOCUMENTS]; //哈希串
 //以上是经过order_by_length转换之后的data, 值都是GPU中的地址
 
-static int h_ans_len[MAX_BLOCKS];
-static int h_ans[MAX_DOCUMENTS];
+//static int h_ans_len[MAX_BLOCKS];
+//static int h_ans[MAX_DOCUMENTS];
 
 //以上是临时数据
 

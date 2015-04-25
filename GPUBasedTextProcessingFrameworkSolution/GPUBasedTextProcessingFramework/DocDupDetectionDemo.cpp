@@ -90,7 +90,7 @@ int doc_dup_detection_test(int argc, char** argv) {
 
 	if (mask & 1) {
 		DocDupDetector *det = new DocDupDetectorCPU(logger);
-		docDupDetectorTest(det, files_dir, max_doc);
+		docDupDetectorTest(det, files_dir, max_doc, logger);
 		cpu_time = det->core_time;
 		LOG(logger, "%s", "Test cpu doc dup dector complete");
 		delete det;
@@ -101,7 +101,7 @@ int doc_dup_detection_test(int argc, char** argv) {
 		if (blocks != -1) {
 			det->set_param(blocks, threads, method);
 		}
-		docDupDetectorTest(det, files_dir, max_doc);
+		docDupDetectorTest(det, files_dir, max_doc, logger);
 		gpu_time = det->core_time;
 		delete det;
 	}

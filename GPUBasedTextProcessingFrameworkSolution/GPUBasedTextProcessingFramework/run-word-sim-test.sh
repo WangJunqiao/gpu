@@ -39,7 +39,7 @@ run_gpu(){
     $run_code
 }
 
-for word_num in 10000 20000 50000 100000
+for word_num in 5000 10000 20000 50000 100000
 do
     run_cpu $word_num
 	for blocks in 128 256 512
