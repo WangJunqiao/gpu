@@ -99,7 +99,7 @@ void DocDupDetectorGPU::add_document(string doc) {
 	strcpy(h, code.c_str());
 
 	//cout<<code<<endl;
-	LOG(logger, "doc_id = %d, hash_value = %s\n", (int)contents_buffer.size(), code.c_str());
+	LOG(logger, "doc_id = %d, hash_value = %s", (int)contents_buffer.size(), code.c_str());
 	average_len += code.length();
 
 	contents_buffer.push_back(p);
@@ -405,10 +405,12 @@ void DocDupDetectorGPU::calculate_dups() {
 	for(int i=0;i<doc_num;i++) {
 		candies[i].clear();
 	}
+	LOG(logger, "Params: blocks = %d, threads = %d, method = %d", blocks, threads, method);
 	if (this->blocks == -1) {
 		LOG(logger, "%s", "No set blocks, threads and method, use default value!!!");
 		this->method = 1;
 	}
+
 	if (this->method == 1) {
 		LOG(logger, "%s", "use method 1");
 		useMethod1(doc_num, d_hashstrs, d_hashstrs_length, d_startId, d_endedId);
