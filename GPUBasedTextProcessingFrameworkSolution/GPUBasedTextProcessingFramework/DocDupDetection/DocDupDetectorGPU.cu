@@ -16,9 +16,8 @@ using namespace std;
 
 
 #define MAX_DOCUMENTS 200010
-#define MAX_HASH_STR_LEN 128
 
-#define MAX_DUP_HASHSTRING_LENGTH (MAX_HASH_STR_LEN + 2)   //7k
+#define MAX_HASH_STR_LEN 128
 
 #define ROLLING_WINDOW 7
 #define THRESHOLD 0.7
@@ -69,7 +68,7 @@ void DocDupDetectorGPU::add_document(string doc) {
 
 	string code = "";
 	int block_size = 4;
-	while(code=="" || code.length()>MAX_HASH_STR_LEN) {
+	while(code=="" || code.length() >= MAX_HASH_STR_LEN) {
 		code = "";
 		for(int i=0, j;i<(int)doc.length();i++) {
 			unsigned roll_h = 0, h = 0;
@@ -116,9 +115,9 @@ __global__ void calcDupsByGpu(char **d_hashstrs, int *d_hashstrs_length, int *d_
 	int start = d_startId[b1 + bid_intotal];
 	int ended = d_endedId[b1 + bid_intotal];
 
-	__shared__ EditDistT edit_dis[2][MAX_DUP_HASHSTRING_LENGTH];
-	__shared__ char str1[MAX_DUP_HASHSTRING_LENGTH];
-	__shared__ char str2[MAX_DUP_HASHSTRING_LENGTH];
+	__shared__ EditDistT edit_dis[2][MAX_HASH_STR_LEN];
+	__shared__ char str1[MAX_HASH_STR_LEN];
+	__shared__ char str2[MAX_HASH_STR_LEN];
 	int len1 = d_hashstrs_length[b1+bid_intotal], len2;
 	//cudaMemcpy(str1+1, d_hashstrs[b1+bid_intotal], sizeof(char) * len1, cudaMemcpyDeviceToDevice);
 	for(int i=0;i<len1;i++) {
@@ -179,10 +178,10 @@ __global__ void calcDupsByGpu3(char **d_hashstrs, int *d_hashstrs_length, int *d
 
 	int tid_intotal = blockId * nThreadPerBlock + threadId;
 	EditDistT* dp[2];
-	dp[0] = edit_dis + tid_intotal * 2 * MAX_DUP_HASHSTRING_LENGTH;
-	dp[1] = dp[0] + MAX_DUP_HASHSTRING_LENGTH;
+	dp[0] = edit_dis + tid_intotal * 2 * MAX_HASH_STR_LEN;
+	dp[1] = dp[0] + MAX_HASH_STR_LEN;
 
-	__shared__ char str2[MAX_DUP_HASHSTRING_LENGTH];
+	__shared__ char str2[MAX_HASH_STR_LEN];
 	int len2 = d_hashstrs_length[b1+blockId], len1;
 	if(threadId == 0) {
 		for(int i=0;i<len2;i++) {
@@ -239,8 +238,8 @@ static char *  h_hashstrs[MAX_DOCUMENTS];
 static int     h_hashstrs_length[MAX_DOCUMENTS]; //哈希串
 //以上是经过order_by_length转换之后的data, 值都是GPU中的地址
 
-//static int h_ans_len[MAX_BLOCKS];
-//static int h_ans[MAX_DUP_DOCUMENTS];
+static int h_ans_len[MAX_BLOCKS];
+static int h_ans[MAX_DOCUMENTS];
 
 //以上是临时数据
 
@@ -287,7 +286,7 @@ void DocDupDetectorGPU::useMethod1(int doc_num, char **d_hashstrs, int *d_hashst
 
 void DocDupDetectorGPU::useMethod3(int doc_num, char **d_hashstrs, int *d_hashstrs_length, int *d_startId, int *d_endedId) {
 	clock_t ttt = clock();
-	EditDistT *edit_dis = memo_mana_s.gpu_malloc(MAX_THREADS * 2 * MAX_DUP_HASHSTRING_LENGTH);
+	EditDistT *edit_dis = memo_mana_s.gpu_malloc(MAX_THREADS * 2 * MAX_HASH_STR_LEN);
 
 	char *char_map = memo_mana_c.gpu_malloc(MAX_BLOCKS * doc_num);
 	char *h_char_map = (char*)malloc(MAX_BLOCKS * doc_num); //freed
@@ -301,9 +300,9 @@ void DocDupDetectorGPU::useMethod3(int doc_num, char **d_hashstrs, int *d_hashst
 		LOG(logger, "time used: %lf s", (clock()-t) / (double)CLOCKS_PER_SEC);
 
 		t = clock();
-		safeCudaCall(cudaMemcpy(h_char_map, char_map, sizeof(char) * MAX_BLOCKS * MAX_DUP_DOCUMENTS, cudaMemcpyDeviceToHost));
+		safeCudaCall(cudaMemcpy(h_char_map, char_map, sizeof(char) * MAX_BLOCKS * MAX_DOCUMENTS, cudaMemcpyDeviceToHost));
 		for(int i=0;i<b2-b1;i++) {
-			for(int j=0;j<MAX_DUP_DOCUMENTS;j++) if(h_char_map[i*MAX_DUP_DOCUMENTS + j] == 'y') {
+			for(int j=0;j<doc_num;j++) if(h_char_map[i*doc_num + j] == 'y') {
 				int id1 = order_by_length[b1+i].second;
 				int id2 = order_by_length[j].second;
 				if(id1 == id2) continue;
