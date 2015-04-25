@@ -12,8 +12,6 @@
 using namespace std;
 
 void docDupDetectorTest(DocDupDetector *detector, string files_dir, int max_doc, Logger *logger) {
-	detector->initialize();
-
 	CodeforcesDataSource *dataSource = new CodeforcesDataSource();
 	dataSource->set_files_directory(files_dir);
 	dataSource->openSource();
@@ -90,6 +88,7 @@ int doc_dup_detection_test(int argc, char** argv) {
 
 	if (mask & 1) {
 		DocDupDetector *det = new DocDupDetectorCPU(logger);
+		det->initialize();
 		docDupDetectorTest(det, files_dir, max_doc, logger);
 		cpu_time = det->core_time;
 		LOG(logger, "%s", "Test cpu doc dup dector complete");
@@ -98,6 +97,7 @@ int doc_dup_detection_test(int argc, char** argv) {
 
 	if (mask & 2) {
 		DocDupDetectorGPU *det = new DocDupDetectorGPU(logger);
+		det->initialize();
 		if (blocks != -1) {
 			det->set_param(blocks, threads, method);
 		}
