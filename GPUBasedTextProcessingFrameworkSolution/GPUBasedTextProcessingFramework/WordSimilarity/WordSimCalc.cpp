@@ -270,7 +270,7 @@ void WordSimCalculator::calc_mutual_info_matrix(DocumentSource *doc_src) {
 
 
 void WordSimCalculator::rebuild_triples(int order1, int order2) {
-	vector<HashMapIF*> sims(word_id.size(), NULL);
+	vector<HashMapIF*> sims(this->top_words_num, NULL);
 	for(int i=0;i<sims.size();i++) {
 		sims[i] = new HashMapIF(); // freed 
 	}
@@ -290,7 +290,7 @@ void WordSimCalculator::rebuild_triples(int order1, int order2) {
 
 	fp = fopen(get_matrix_file_name(order2).c_str(), "wb");
     int threshold = 1000;
-	for(int i=0;i<word_id.size();i++) {
+	for(int i=0;i<this->top_words_num;i++) {
 		vector<pair<int, float> > vif(sims[i]->begin(), sims[i]->end());
 		int num = vif.size();
 		float sum = 0.0;
