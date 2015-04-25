@@ -14,7 +14,7 @@
 
 using namespace std;
 
-
+#define SHARED_MEMORY_SIZE 49152
 #define MAX_DOCUMENTS 200010
 
 #define MAX_HASH_STR_LEN 128
@@ -25,13 +25,11 @@ using namespace std;
 #define BASE 130
 #define ALPHA_NUMBER 94
 
-#define MAX_BLOCKS 64       //每次循环处理的文档数
-#define MAX_THREADS_PER_BLOCK 64
-#define MAX_THREADS (MAX_BLOCKS * MAX_THREADS_PER_BLOCK)
+
 
 #define INF 0x6fff
 
-typedef short EditDistT;
+typedef unsigned char EditDistT;
 typedef unsigned int hash_type;
 
 
@@ -56,6 +54,14 @@ void DocDupDetectorGPU::initialize() {
 		candies[i].clear();
 		real_dups[i].clear();
 	}
+	blocks = threads = 64; //default value
+	method = -1; //unset
+}
+
+void DocDupDetectorGPU::set_param(int blocks, int threads, int method) {
+	this->blocks = blocks;
+	this->threads = threads;
+	this->method = method;
 }
 
 void DocDupDetectorGPU::add_document(string doc) {
@@ -103,27 +109,37 @@ void DocDupDetectorGPU::add_document(string doc) {
 }
 
 //计算[b1, b2)内的所有串跟其他串的重复情况, 一般情况下tot_blocks = b2 - b1
-__global__ void calcDupsByGpu(char **d_hashstrs, int *d_hashstrs_length, int *d_startId, int *d_endedId, int b1, int b2, int doc_num, int *ans_buffer, int *ans_len) {
-	int tot_blocks = gridDim.x;
+__global__ void calcDupsByGpu(char **d_hashstrs, int *d_hashstrs_length, int *d_startId, int *d_endedId, int b1, int b2, int doc_num, char *char_map) {
+	//int tot_blocks = gridDim.x;
 	//assert(blockDim.x == 1);
-	int bid_intotal = blockIdx.x;
+	int block_id = blockIdx.x;
 	
+	int threads = blockDim.x;
+	int thread_id = threadIdx.x;
 	if(b1 + bid_intotal >= b2) 
 		return;
 
-	ans_len[bid_intotal] = 0;
-	int start = d_startId[b1 + bid_intotal];
-	int ended = d_endedId[b1 + bid_intotal];
+	int start = d_startId[b1 + block_id];
+	int ended = d_endedId[b1 + block_id];
 
-	__shared__ EditDistT edit_dis[2][MAX_HASH_STR_LEN];
-	__shared__ char str1[MAX_HASH_STR_LEN];
-	__shared__ char str2[MAX_HASH_STR_LEN];
-	int len1 = d_hashstrs_length[b1+bid_intotal], len2;
+
+
+	__shared__ EditDistT edit_dis_buf[2 * MAX_HASH_STR_LEN * 95];
+	__shared__ char str1_buf[MAX_HASH_STR_LEN * 95];
+	__shared__ char str2_buf[MAX_HASH_STR_LEN * 95];
+	EditDistT* edit_dis[2];
+	char *str1, *str2;
+	edit_dis[0] = edit_dis_buf + thread_id * MAX_HASH_STR_LEN * 2;
+	edit_dis[1] = edit_dis[0] + MAX_HASH_STR_LEN;
+	str1 = str1_buf + thread_id * MAX_HASH_STR_LEN;
+	str2 = str2_buf + thread_id * MAX_HASH_STR_LEN;
+
+	int len1 = d_hashstrs_length[b1 + block_id], len2;
 	//cudaMemcpy(str1+1, d_hashstrs[b1+bid_intotal], sizeof(char) * len1, cudaMemcpyDeviceToDevice);
 	for(int i=0;i<len1;i++) {
-		str1[i+1] = d_hashstrs[b1+bid_intotal][i];
+		str1[i+1] = d_hashstrs[b1 + block_id][i];
 	}
-	for(int to = start;to <= ended;to ++) {
+	for(int to = start + thread_id;to <= ended;to += threads) {
 		len2 = d_hashstrs_length[to];
 		//cudaMemcpy(str2+1, d_hashstrs[to], sizeof(char) * len2, cudaMemcpyDeviceToDevice);
 		for(int i=0;i<len2;i++) {
@@ -149,7 +165,7 @@ __global__ void calcDupsByGpu(char **d_hashstrs, int *d_hashstrs_length, int *d_
 		//printf("edit-dis[%d - %d] = %d\n", b1 + bid_intotal, to, edit_dis[now][len2]);
 		if(edit_dis[now][len2] < len1 * (1.0 - THRESHOLD) &&
 			edit_dis[now][len2] < len2 * (1.0 - THRESHOLD)) {
-				ans_buffer[bid_intotal * doc_num + ans_len[bid_intotal]++] = to;
+				char_map[block_id * doc_num + to] = 'y';
 				//printf("debug: %d - %d\n", b1 + bid_intotal, to);
 		}
 	}
@@ -225,7 +241,6 @@ __global__ void calcDupsByGpu3(char **d_hashstrs, int *d_hashstrs_length, int *d
 		if(dp[now][len2] < len2 * (1.0 - THRESHOLD) &&
 			dp[now][len2] < len1 * (1.0 - THRESHOLD)) {
 				char_map[blockId * doc_num + to] = 'y';
-				//ans_buffer[bid_intotal * doc_num + ans_len[bid_intotal]++] = to;
 				//printf("debug: %d - %d\n", b1 + bid_intotal, to);
 		}
 	}
@@ -252,27 +267,32 @@ static CudaMemoryManager<EditDistT> memo_mana_s;
 
 
 void DocDupDetectorGPU::useMethod1(int doc_num, char **d_hashstrs, int *d_hashstrs_length, int *d_startId, int *d_endedId) {
+	int max_threads = SHARED_MEMORY_SIZE / (4 * sizeof(EditDistT) * MAX_HASH_STR_LEN) - 1;
+	if (threads > max_threads) {
+		this->threads = max_threads;
+		LOG(logger, "set threads value is too big, max values is %d", max_threads);
+	}
+	LOG(logger, "blocks = %d, threads = %d", blocks, threads);
 	clock_t ttt = clock();
-	int *d_ans_buf = memo_mana_i.gpu_malloc(MAX_BLOCKS * doc_num); 
-	int *d_ans_len = memo_mana_i.gpu_malloc(MAX_BLOCKS);
-	safeCudaCall(cudaMemset(d_ans_len, 0, sizeof(int) * MAX_BLOCKS));
 
-	for(int b1=0;b1<doc_num;b1+=MAX_BLOCKS) {
-		int b2 = min(b1 + MAX_BLOCKS, doc_num);
+	char *char_map = memo_mana_c.gpu_malloc(blocks * doc_num);
+	char *h_char_map = (char*)malloc(blocks * doc_num); //freed
+
+	for(int b1 = 0; b1 < doc_num; b1 += blocks) {
+		int b2 = min(b1 + blocks, doc_num);
 		LOG(logger, "Processing docs[%6d, %6d)......", b1, b2);
 		int t = clock();
-		calcDupsByGpu<<<MAX_BLOCKS, 1>>>(d_hashstrs, d_hashstrs_length, d_startId, d_endedId, b1, b2, doc_num, d_ans_buf, d_ans_len);
+		safeCudaCall(cudaMemset(char_map, 0, sizeof(char)*(blocks * doc_num)));
+		calcDupsByGpu<<<blocks, threads>>>(d_hashstrs, d_hashstrs_length, d_startId, d_endedId, b1, b2, doc_num, char_map);
 		cudaDeviceSynchronize();
 		LOG(logger, "time used: %lf s\n", (clock()-t) / (double)CLOCKS_PER_SEC);
 
 		t = clock();
-		safeCudaCall(cudaMemcpy(h_ans_len, d_ans_len, sizeof(int) * MAX_BLOCKS, cudaMemcpyDeviceToHost));
-		for(int i=0;i<b2-b1;i++) if(h_ans_len[i] > 0) {
-			safeCudaCall(cudaMemcpy(h_ans, d_ans_buf + i * doc_num, h_ans_len[i] * sizeof(int), cudaMemcpyDeviceToHost));
-			//printf("h_ans_len[%d] = %d, id1 = %d\n", b1+i, h_ans_len[i], order_by_length[b1+i].second);
-			for(int j=0;j<h_ans_len[i];j++) {
-				int id1 = order_by_length[b1+i].second;
-				int id2 = order_by_length[h_ans[j]].second;
+		safeCudaCall(cudaMemcpy(h_char_map, char_map, sizeof(char) * blocks * doc_num, cudaMemcpyDeviceToHost));
+		for(int i = 0;i < b2 - b1; i ++) {
+			for(int j = 0;j < doc_num; j ++) if (h_char_map[i * doc_num + j] == 'y') {
+				int id1 = order_by_length[b1 + i].second;
+				int id2 = order_by_length[j].second;
 				if(id1 == id2) continue;
 				candies[id1].push_back(id2);
 				if(id1 > id2) candies[id2].push_back(id1);
@@ -280,30 +300,33 @@ void DocDupDetectorGPU::useMethod1(int doc_num, char **d_hashstrs, int *d_hashst
 		}
 		LOG(logger, "data copy and insert: %lf s\n", (clock()-t) / (double)CLOCKS_PER_SEC);
 	}
-
+	free(h_char_map);
 	LOG(logger, "calculateDups time: %lf s\n", (clock()-ttt) / (double)CLOCKS_PER_SEC);
 }
 
 void DocDupDetectorGPU::useMethod3(int doc_num, char **d_hashstrs, int *d_hashstrs_length, int *d_startId, int *d_endedId) {
 	clock_t ttt = clock();
-	EditDistT *edit_dis = memo_mana_s.gpu_malloc(MAX_THREADS * 2 * MAX_HASH_STR_LEN);
+	LOG(logger, "blocks = %d, threads = %d", blocks, threads);
 
-	char *char_map = memo_mana_c.gpu_malloc(MAX_BLOCKS * doc_num);
-	char *h_char_map = (char*)malloc(MAX_BLOCKS * doc_num); //freed
-	for(int b1=0;b1<doc_num;b1+=MAX_BLOCKS) {
-		int b2 = min(b1 + MAX_BLOCKS, doc_num);
+	EditDistT *edit_dis = memo_mana_s.gpu_malloc(blocks * threads * 2 * MAX_HASH_STR_LEN);
+
+	char *char_map = memo_mana_c.gpu_malloc(blocks * doc_num);
+	char *h_char_map = (char*)malloc(blocks * doc_num); //freed
+
+	for(int b1 = 0; b1 < doc_num; b1 += blocks) {
+		int b2 = min(b1 + blocks, doc_num);
 		LOG(logger, "Processing docs[%6d, %6d)......", b1, b2);
 		int t = clock();
-		safeCudaCall(cudaMemset(char_map, 0, sizeof(char)*(MAX_BLOCKS * doc_num)));
-		calcDupsByGpu3<<<MAX_BLOCKS, MAX_THREADS_PER_BLOCK>>>(d_hashstrs, d_hashstrs_length, d_startId, d_endedId, b1, b2, doc_num, char_map, edit_dis);
+		safeCudaCall(cudaMemset(char_map, 0, sizeof(char)*(blocks * doc_num)));
+		calcDupsByGpu3<<<blocks, threads>>>(d_hashstrs, d_hashstrs_length, d_startId, d_endedId, b1, b2, doc_num, char_map, edit_dis);
 		cudaDeviceSynchronize();
 		LOG(logger, "time used: %lf s", (clock()-t) / (double)CLOCKS_PER_SEC);
 
 		t = clock();
-		safeCudaCall(cudaMemcpy(h_char_map, char_map, sizeof(char) * MAX_BLOCKS * MAX_DOCUMENTS, cudaMemcpyDeviceToHost));
-		for(int i=0;i<b2-b1;i++) {
-			for(int j=0;j<doc_num;j++) if(h_char_map[i*doc_num + j] == 'y') {
-				int id1 = order_by_length[b1+i].second;
+		safeCudaCall(cudaMemcpy(h_char_map, char_map, sizeof(char) * blocks * doc_num, cudaMemcpyDeviceToHost));
+		for(int i = 0;i < b2 - b1; i ++) {
+			for(int j = 0;j < doc_num; j ++) if (h_char_map[i * doc_num + j] == 'y') {
+				int id1 = order_by_length[b1 + i].second;
 				int id2 = order_by_length[j].second;
 				if(id1 == id2) continue;
 				candies[id1].push_back(id2);
@@ -316,9 +339,14 @@ void DocDupDetectorGPU::useMethod3(int doc_num, char **d_hashstrs, int *d_hashst
 	LOG(logger, "calculateDups time: %lf s", (clock()-ttt) / (double)CLOCKS_PER_SEC);
 }
 
+
 void DocDupDetectorGPU::calculate_dups() {
 	LOG(logger, "%s", "Begin calculate doc dups by GPU.");
 	LOG(logger, "average_len = %lf", average_len / contents_buffer.size());
+	if (MAX_HASH_STR_LEN >= 256) {
+		LOG(logger, "%s", "MAX_HASH_STR_LEN bigger than 255, edit distance value type is unsigned char, not support!!!");
+		exit(0);
+	}
 	int ttt = clock();
 	int doc_num = contents_buffer.size();
 	order_by_length.clear();
@@ -377,9 +405,17 @@ void DocDupDetectorGPU::calculate_dups() {
 	for(int i=0;i<doc_num;i++) {
 		candies[i].clear();
 	}
-
-	useMethod1(doc_num, d_hashstrs, d_hashstrs_length, d_startId, d_endedId);
-	//useMethod3(doc_num, d_hashstrs, d_hashstrs_length, d_startId, d_endedId);
+	if (this->blocks == -1) {
+		LOG(logger, "%s", "No set blocks, threads and method, use default value!!!");
+		this->method = 1;
+	}
+	if (this->method == 1) {
+		LOG(logger, "%s", "use method 1");
+		useMethod1(doc_num, d_hashstrs, d_hashstrs_length, d_startId, d_endedId);
+	} else {
+		LOG(logger, "%s", "use method 3");
+		useMethod3(doc_num, d_hashstrs, d_hashstrs_length, d_startId, d_endedId);
+	}
 
 	core_time = clock() - ttt;
 	LOG(logger, "hashstrs average length: %lf, max length: %lf", sumL / doc_num, maxL);

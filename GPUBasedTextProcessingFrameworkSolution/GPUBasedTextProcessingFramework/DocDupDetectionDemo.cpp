@@ -11,7 +11,7 @@
 
 using namespace std;
 
-void docDupDetectorTest(DocDupDetector *detector, string files_dir, int max_doc) {
+void docDupDetectorTest(DocDupDetector *detector, string files_dir, int max_doc, Logger *logger) {
 	detector->initialize();
 
 	CodeforcesDataSource *dataSource = new CodeforcesDataSource();
@@ -26,18 +26,16 @@ void docDupDetectorTest(DocDupDetector *detector, string files_dir, int max_doc)
 	//detector->refine();
 
 	int cas = 10;
-	FILE *fp = stdout;
-	assert(fp != NULL);
 	while(cas--) {
 		int did = rand() * (long long)rand() % N;
 		vector<int> candies = detector->get_candidate_dup_docs(did);
 		string doc_name = dataSource->getDocumentName(did);
 		//cout<<doc_name<<endl;
-		fprintf(fp, "candidates for document %d[%s]: ", did, doc_name.c_str());
+		LOG(logger, "candidates for document %d[%s]: ", did, doc_name.c_str());
 		for(int i=0;i<(int)candies.size();i++) {
-			fprintf(fp, " %d[%s]", candies[i], dataSource->getDocumentName(candies[i]).c_str());
+			LOG(logger, " %d[%s]", candies[i], dataSource->getDocumentName(candies[i]).c_str());
 		}
-		fprintf(fp, "\n");
+		//fprintf(fp, "\n");
 	}
 	//fclose(fp);
 }
@@ -49,6 +47,7 @@ static void print_usage() {
 	printf("-gpu         test in GPU\n");
 	printf("-log         log file name, e.g. ./log.txt\n");
 	printf("-max_docs    max documents, eg 6000000\n");
+	printf("-set_param   set blocks, threads, method");
 	exit(0);
 }
 
@@ -58,6 +57,7 @@ int doc_dup_detection_test(int argc, char** argv) {
 	int mask = 0;
 	int max_doc = 50000; 
 	
+	int blocks = -1, threads, method;
 	for (int i = 2; i < argc;) {
 		if (strcmp(argv[i], "-log") == 0 && i + 1 < argc) {
 			file_logger = new Logger(argv[i + 1], false);
@@ -74,6 +74,11 @@ int doc_dup_detection_test(int argc, char** argv) {
 		} else if (strcmp(argv[i], "-max_doc") == 0 && i + 1 < argc) {
 			max_doc = atoi(argv[i + 1]);
 			i += 2;
+		} else if (strcmp(argv[i], "-set_param") == 0 && i + 3 < argc) {
+			blocks = atoi(argv[i + 1]);
+			threads = atoi(argv[i + 2]);
+			method = atoi(argv[i + 3]);
+			i += 4;
 		} else {
 			print_usage();
 		}
@@ -92,13 +97,16 @@ int doc_dup_detection_test(int argc, char** argv) {
 	}
 
 	if (mask & 2) {
-		DocDupDetector *det = new DocDupDetectorGPU(logger);
+		DocDupDetectorGPU *det = new DocDupDetectorGPU(logger);
+		if (blocks != -1) {
+			det->set_param(blocks, threads, method);
+		}
 		docDupDetectorTest(det, files_dir, max_doc);
 		gpu_time = det->core_time;
 		delete det;
 	}
 
-	printf("cpu_time = %lf s, gpu_time = %lf s, speed up = %.2lf\n", cpu_time / (double)CLOCKS_PER_SEC, gpu_time / (double)CLOCKS_PER_SEC, cpu_time / (double)gpu_time);
+	LOG(logger, "cpu_time = %lf s, gpu_time = %lf s, speed up = %.2lf\n", cpu_time / (double)CLOCKS_PER_SEC, gpu_time / (double)CLOCKS_PER_SEC, cpu_time / (double)gpu_time);
 	
 	return 0;
 }

@@ -38,12 +38,15 @@ public:
 	void refine();
 	vector<int> get_real_dup_docs(int doc_id);
 
+	void set_param(int blocks, int threads, int methods);
+
 	~DocDupDetectorGPU();
 
 private:
 	void useMethod1(int doc_num, char **d_hashstrs, int *d_hashstrs_length, int *d_startId, int *d_endedId);
 	void useMethod3(int doc_num, char **d_hashstrs, int *d_hashstrs_length, int *d_startId, int *d_endedId);
 	Logger *logger;
+	int blocks, threads, method;
 };
 
 #endif
