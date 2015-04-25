@@ -22,7 +22,8 @@ WordSimCalculator::WordSimCalculator(Logger *logger, const string &root_dir, con
 	this->root_dir = root_dir;
 	this->result_dir = result_dir;
 	this->top_words_num = top_words_num;
-	if (this->root_dir.back() != '/') {
+    this->win_size = win_size;
+    if (this->root_dir.back() != '/') {
 		this->root_dir += "/";
 	}
 	if(this->result_dir.back() != '/') {
@@ -161,7 +162,7 @@ void WordSimCalculator::calc_mutual_info_matrix(DocumentSource *doc_src) {
 	long long word_tot = 0;
 	while(doc_src->hasNext()) {
 		istringstream sin(doc_src->getNextDocument());
-		vector<int> vs;
+        vector<int> vs;
 		string word;
 		while(sin>>word) {
 			word_tot ++;
@@ -181,7 +182,6 @@ void WordSimCalculator::calc_mutual_info_matrix(DocumentSource *doc_src) {
 			}
 			max_size = max(max_size, (int)cnt_map[vs[i]]->size());
 		}
-
 		line++;
 		if (line == threshold) {
 			LOG(logger, "line = %d, max_size = %d", line, max_size);
