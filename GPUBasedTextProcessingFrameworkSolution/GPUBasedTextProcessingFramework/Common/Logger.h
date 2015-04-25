@@ -92,6 +92,7 @@ private:
 
 	void output(const char* str) {
 		fprintf(this->fp, "%s", str);
+		fflush(this->fp);
 		if (logger) {
 			logger->output(str);
 		}
