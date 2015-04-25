@@ -157,7 +157,7 @@ void WordSimCalculator::calc_mutual_info_matrix(DocumentSource *doc_src) {
 	long long co_oc_s = 0;
 
 	doc_src->openSource();
-	int line = 0, max_size = 0, threshold = 10000;	
+	int line = 0, max_size = 0, threshold = 1;	
 	long long word_tot = 0;
 	while(doc_src->hasNext()) {
 		istringstream sin(doc_src->getNextDocument());
