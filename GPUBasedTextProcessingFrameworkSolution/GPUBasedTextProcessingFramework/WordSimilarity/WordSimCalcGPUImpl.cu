@@ -301,7 +301,7 @@ void GPUWordSimCalculator::calc_similarity_matrix() {
 
 	core_time = clock() - ttt;
 
-	rebuild_triples(2, 2);
+	//rebuild_triples(2, 2);
 
 	
 }
