@@ -1,0 +1,74 @@
+<html>
+<head>
+  <title>cuda 5.0 在 ubuntu 13.04 中的安装过程</title>
+  <basefont face="Tahoma" size="2" />
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  <meta name="exporter-version" content="Evernote Windows/268868 (zh-CN); Windows/6.1.7601 Service Pack 1;"/>
+  <style>
+    body, td {
+      font-family: Tahoma;
+      font-size: 10pt;
+    }
+  </style>
+</head>
+<body>
+<a name="644"/>
+
+<div>
+<div style="word-wrap: break-word; -webkit-nbsp-mode: space; -webkit-line-break: after-white-space;"><div><b style="font-size: 32px;">cuda 5.0 在 ubuntu 13.04 的安装过程 by ycc</b></div><div><span style="font-size: 21px;"><br></span></div><span style="font-size: 21px;">步骤 1：</span><span style="font-size: 21px;">下载驱动和环境包</span><div>显卡驱动下载地址：<br><div><a href="http://cn.download.nvidia.com/XFree86/Linux-x86_64/319.32/NVIDIA-Linux-x86_64-319.32.run" target="_blank">http://cn.download.nvidia.com/XFree86/Linux-x86_64/319.32/NVIDIA-Linux-x86_64-319.32.run</a></div><div>cuda 安装包下载地址：</div><div><a href="http://developer.download.nvidia.com/compute/cuda/5_0/rel-update-1/installers/cuda_5.0.35_linux_64_ubuntu11.10-1.run" target="_blank">http://developer.download.nvidia.com/compute/cuda/5_0/rel-update-1/installers/cuda_5.0.35_linux_64_ubuntu11.10-1.run</a></div><div>cuda 5.0 以上是不分 toolkit 和 gpu-sdk 的，只有一个 run 包。</div><div> </div><div><span style="font-size: 21px;">步骤 2：安装支持软件包</span><div>在安装之前需要安装一些软件包，这个可以从 apt 源安装，命令如下：</div><div><font color="#328712">$ sudo apt-get install freeglut3 freeglut3-dev build-essential \</font></div><div><font color="#328712">    libx11-dev libxmu-dev libxi-dev libgl1-mesa-glx \</font></div><div><font color="#328712">    libglu1-mesa libglu1-mesa-dev build-essential gcc-4.4 g++-4.4 \</font></div><div><font color="#328712">    linux-headers-generic linux-source</font></div><div>再对 libglut.so 进行链接：</div><div><font color="#328712">$ sudo ln -s /usr/lib/x86_64-linux-gnu/libglut.so.3 /usr/lib/libglut.so</font></div><div>因为 cuda 5.0 只支持 gcc-4.4 而 ubuntu 13.04 默认安装的是 gcc-4.7 ，所以需要另外安装 gcc-4.4 ，并进行链接。这里不再使用原始的 ln 命令，而使用发行版附带的 update-alternatives 命令自动修改链接，完整的命令如下：</div><div><font color="#328712">$ sudo update-alternatives --remove-all gcc</font></div><div><font color="#328712">$ sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.4 20</font></div><div><font color="#328712">$ sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.7 50</font></div><div>这里 20 50 是优先级，系统会自动选择优先级高的连接，在进行显卡驱动安装时，暂时将 gcc-4.4 的优先级设为 20，因为安装驱动需要编译内核，编译内核就需要使用 gcc-4.7 。</div><div>同样对 g++ 也执行此操作：</div><div><font color="#328712">$ sudo update-alternatives --remove-all g++</font></div><div><font color="#328712">$ sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.4 20</font></div><div><font color="#328712">$ sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.7 50</font></div><div><br></div><div style="font-size: 21px;">步骤 3：安装显卡驱动</div><div>需要先关掉 X server ，可以通过停止 gdm 服务来做到。</div><div>由于默认登陆的是图形界面（tty7），所以先跳到 tty1 登陆（按Ctrl + Alt + F1），然后输入以下命令：</div><div><font color="#328712">$ sudo stop lightgdm</font></div><div>这时再回到 tty7 就发现图形界面没有了，只有一个不停闪烁的光标，说明成功停止服务。</div><div>回到 tty1 ，输入：</div><div><font color="#328712">$ sudo chmod a+x NVIDIA-Linux-x86_64-319.32.run</font></div><div><font color="#328712">$ sudo ./NVIDIA-Linux-x86_64-319.32.run</font></div><div>按照说明一步一步走，如果之前有 ubuntu 的默认 nv 驱动，会提示添加屏蔽规则，选择确认添加，接着会提示先退出安装，退出后，重新运行就好了。其中会选择是否安装兼容的 32 位 OpenGL，这里可以不安装，用 64 位的就好了。</div><div><br></div><div style="font-size: 21px;">步骤 4：安装 cuda 环境</div><div>首先设置 gcc-4.4 的优先级为 100，使得系统选择 gcc-4.4。</div><div><font color="#328712">$ </font><span style="color: rgb(50, 135, 18);">sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.4 100</span></div><div><font color="#328712">$ </font><span style="color: rgb(50, 135, 18);">sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.4 100</span></div><div>然后在 tty1 中输入如下命令：</div><div><font color="#328712">$ sudo chmod a+x cuda_5.0.35_linux_64_ubuntu11.10-1.run</font></div><div><font color="#328712">$ sudo ./cuda_5.0.35_linux_64_ubuntu11.10-1.run</font></div><div>这个将近 700M 的包里面有三个选择项：显卡加速驱动、cuda sdk、cuda examples</div><div>注意这里的显卡驱动不要安装，尽管最后程序会提示安装不完全，但是不用理会这个警告，因为之前已经装过较新版本的驱动了，重新安装这个包中的老版本将导致电脑重启后无法启用显卡驱动（遇到这种情况请转到<font color="#AD0000">步骤X</font>）。第三个由于环境没有设置好，将会发生无法安装的问题，所以还是要运行两次。。。（说实话nv的安装包虽然较以前少了很多坑，不过还是不是那么完善，坑依然很多。。）</div><div><br></div><div style="font-size: 21px;">步骤 5：设置环境变量</div><div>在 ~/.bashrc 的最后添加以下两行：</div><div><font color="#939600">export PATH=$PATH:/usr/local/cuda/bin</font></div><div><font color="#939600">export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda/lib64</font></div><div>在终端中输入以下命令使以上配置立即生效：</div><div><font color="#328712">$ source ~/.bashrc</font></div><div>接着配置一下 ld 路径</div><div>在 /etc/ld.so.conf 最后添加一行：</div><div><font color="#939600">/usr/local/cuda/lib64</font></div><div>再运行如下命令：</div><div><font color="#328712">$ sudo ldconfig</font></div><div><font color="#328712">$ sudo ldconfig -v | grep cuda</font></div><div>就可以看到和 cuda 有关的项。最后再次安装 examples 就可以安装成功了：</div><div><span style="color: rgb(50, 135, 18);">$ sudo ./cuda_5.0.35_linux_64_ubuntu11.10-1.run</span></div><div>注意跳过显卡驱动和 cuda sdk 的安装。</div><div><br></div><div style="font-size: 21px;">步骤 6：完成安装并验证</div><div>以下两条命令任选一条重新启动 X 和 Unity：</div><div><font color="#328712">$ sudo reboot</font></div><div><font color="#328712">$ sudo start lightgdm</font></div><div>在 search 按钮中输入 nvidia 就可以看到 nvidia-settings 等三个快捷方式，第三个是 nv 专门用来开发 cuda 的 eclipse 环境（其实 700M 很大部分是 eclipse 和老版驱动，都是用处不大或者非必须的东西。。。），实际开发的时候可以使用这个 eclipse，也可以用 vim 然后自己写 makefile。</div><div>接下来写一段小程序验证安装是否正确：</div><div><br></div><div style="font-size: 16px;">test.cu 文件内容如下：</div><div style="font-size: 16px;"><br></div><div><font color="#939600">#include &lt;stdio.h&gt;<br>
+int main() {<br>
+    int c;<br>
+    cudaGetDeviceCount(&amp;c);<br>
+    printf(&quot;cuda device count: %d\n&quot;, c);<br>
+    for (int i = 0; i &lt; c; ++i) {<br>
+        cudaDeviceProp prop;<br>
+        cudaGetDeviceProperties(&amp;prop, i);<br>
+        printf(&quot;   --- General Information for device %d ---\n&quot;, i);<br>
+        printf(&quot;Name:  %s\n&quot;, prop.name);<br>
+        printf(&quot;Compute capability:  %d.%d\n&quot;, prop.major, prop.minor);<br>
+        printf(&quot;Clock rate:  %d\n&quot;, prop.clockRate);<br>
+        printf(&quot;Device copy overlap:  %s\n&quot;, prop.deviceOverlap ? &quot;Enabled&quot; : &quot;Disabled&quot;);<br>
+        printf(&quot;Kernel execution timeout:  %s\n&quot;, prop.kernelExecTimeoutEnabled ? &quot;Enabled&quot; : &quot;Disabled&quot;);<br>
+        printf(&quot;   --- Memory Information for device %d ---\n&quot;, i);<br>
+        printf(&quot;Total global mem:  %ld\n&quot;, prop.totalGlobalMem);<br>
+        printf(&quot;Total constant mem:  %ld\n&quot;, prop.totalConstMem);<br>
+        printf(&quot;Max mem pitch:  %ld\n&quot;, prop.memPitch);<br>
+        printf(&quot;Texture alignment:  %ld\n&quot;, prop.textureAlignment);<br>
+        printf(&quot;   --- MP Information for device %d ---\n&quot;, i);<br>
+        printf(&quot;Multiprocessor count:  %d\n&quot;, prop.multiProcessorCount);<br>
+        printf(&quot;Shared mem per mp:  %ld\n&quot;, prop.sharedMemPerBlock);<br>
+        printf(&quot;Registers per mp:  %d\n&quot;, prop.regsPerBlock);<br>
+        printf(&quot;Threads in wrap:  %d\n&quot;, prop.warpSize);<br>
+        printf(&quot;Max threads per block:  %d\n&quot;, prop.maxThreadsPerBlock);<br>
+        printf(&quot;Max thread dimensions:  (%d, %d, %d)\n&quot;,<br>
+                prop.maxThreadsDim[0], prop.maxThreadsDim[1],<br>
+                prop.maxThreadsDim[2]);<br>
+        printf(&quot;Max grid dimensions:  (%d, %d, %d)\n&quot;,<br>
+                prop.maxGridSize[0], prop.maxGridSize[1],<br>
+                prop.maxGridSize[2]);<br>
+        puts(&quot;&quot;);<br>
+    }<br>
+    return 0;<br>
+}</font><br></div><div><br></div><div style="font-size: 16px;">makefile 文件内容如下：</div><div style="font-size: 16px;"><br></div><div><font color="#939600">all: test</font></div><div><font color="#939600">test: test.o</font></div><div><font color="#939600">      nvcc --link $^ -o $@      # g++ is OK，gcc is not OK</font></div><div><font color="#939600">test.o: test.cu</font></div><div><font color="#939600">      nvcc -c $^</font></div><div><font color="#939600">clean:</font></div><div><font color="#939600">      rm *.o test -f</font></div><div><br></div><div style="font-size: 16px;">本机运行结果如下：</div><div style="font-size: 16px;"><br></div><div style="font-size: 13px;"><font color="#328712">$ make &amp;&amp; ./test</font><br><font color="#939600">nvcc -c test.cu<br>
+nvcc --link test.o -o test<br>
+cuda device count: 1<br>
+   --- General Information for device 0 ---<br>
+Name:  GeForce GT 620<br>
+Compute capability:  2.1<br>
+Clock rate:  1620000<br>
+Device copy overlap:  Enabled<br>
+Kernel execution timeout:  Enabled<br>
+   --- Memory Information for device 0 ---<br>
+Total global mem:  1073283072<br>
+Total constant mem:  65536<br>
+Max mem pitch:  2147483647<br>
+Texture alignment:  512<br>
+   --- MP Information for device 0 ---<br>
+Multiprocessor count:  1<br>
+Shared mem per mp:  49152<br>
+Registers per mp:  32768<br>
+Threads in wrap:  32<br>
+Max threads per block:  1024<br>
+Max thread dimensions:  (1024, 1024, 64)<br>
+Max grid dimensions:  (65535, 65535, 65535)</font><br></div><div style="font-size: 13px;"><font color="#939600"><br></font></div><div style="font-size: 13px;">于是安装完成！</div><div><br></div><div style="font-size: 21px;">步骤 X：恢复显卡驱动以及 Unity 桌面</div><div>如果安装 cuda 环境过程中不小心安装了老版本的驱动导致显卡无法启用，进而使得 unity 无法开启，结果任务栏什么的都没了。那么也不需要紧张，只要进到 tty1 中安照上面的步骤重新安装 319.32 版的驱动就可以了。</div><div><font color="#328712">$ </font><span style="color: rgb(50, 135, 18);">sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.4 20</span><font color="#328712">      # 让系统选择 gcc-4.7</font></div><div><font color="#328712">$ </font><span style="color: rgb(50, 135, 18);">sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.4 20</span></div><div><span style="color: rgb(50, 135, 18);">$ sudo ./NVIDIA-Linux-x86_64-319.32.run</span></div><div>装完以后 unity 仍无法启动，只要将 compiz 重置一下就好了，具体可以用下面的命令：</div><div><font color="#328712">$ sudo apt-get install dconf-tools           # 安装 dconf 工具</font></div><div><font color="#328712">$ dconf reset -f /org/compiz/                # 重置命令</font></div><div><font color="#328712">$ setsid unity                                       # 重新运行 unity</font></div><div>最后注意恢复使用 gcc-4.4：</div><div><font color="#328712">$ </font><span style="color: rgb(50, 135, 18);">sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.4 100</span></div><div><font color="#328712">$ </font><span style="color: rgb(50, 135, 18);">sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.4 100</span></div><div><br></div><div style="font-size: 21px;">参考：</div><div><a href="http://ccoe.sjtu.edu.cn/blog/index.php/archives/171" target="_blank">http://ccoe.sjtu.edu.cn/blog/index.php/archives/171</a></div><div><a href="http://blog.bloemsaat.com/2013/03/17/installing-cuda-on-ubuntu-13-04-raring-ringtail/" target="_blank">http://blog.bloemsaat.com/2013/03/17/installing-cuda-on-ubuntu-13-04-raring-ringtail/</a></div><div><a href="http://blog.icodex.org/2012/10/how-to-reset-compiz-and-unity-in-ubuntu-12-10-quantal/" target="_blank">http://blog.icodex.org/2012/10/how-to-reset-compiz-and-unity-in-ubuntu-12-10-quantal/</a></div><div><a href="http://developer.download.nvidia.com/compute/cuda/4_2/rel/toolkit/docs/online/group__CUDART__MEMORY_gc63ffd93e344b939d6399199d8b12fef.html#gc63ffd93e344b939d6399199d8b12fef" target="_blank">http://developer.download.nvidia.com/compute/cuda/4_2/rel/toolkit/docs/online/group__CUDART__MEMORY_gc63ffd93e344b939d6399199d8b12fef.html#gc63ffd93e344b939d6399199d8b12fef</a></div><div><br></div><div style="font-size: 21px;">附：</div><div>似乎可以使用 apt-get install nvidia-current cuda-toolkit 的方法安装，不过没有试过，不知里面有多少坑。。</div></div></div></div>
+</div></body></html> 

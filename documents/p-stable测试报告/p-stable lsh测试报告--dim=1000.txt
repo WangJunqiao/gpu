@@ -1,0 +1,54 @@
+n = 100000, dim = 1000, L = 10, m = 1 ,nh = 100, k = 15;
+query次数：10
+construct time:2148
+average query points:48382.700000
+average lsh query time:114.000000
+average speed up:1.603488
+average intersection number:8.500000
+average intersection ratio:0.566667
+average query ratio:0.483827
+average precision:0.566667
+
+n = 100000, dim = 1000, L = 10, m = 2 ,nh = 100, k = 15;
+query次数：10
+construct time:4823
+average query points:4240.300000
+average lsh query time:12.300000
+average speed up:20.452891
+average intersection number:0.600000
+average intersection ratio:0.040000
+average query ratio:0.042403
+average precision:0.040000
+
+n = 100000, dim = 1000, L = 10, m = 3 ,nh = 100, k = 15;
+query次数：10
+construct time:5466
+average query points:340.100000
+average lsh query time:1.100000
+average speed up:175.100000
+average intersection number:0.100000
+average intersection ratio:0.006667
+average query ratio:0.003401
+average precision:0.006667
+
+n = 100000, dim = 1000, L = 20, m = 2 ,nh = 100, k = 15;
+query次数：10
+construct time:9145
+average query points:8448.500000
+average lsh query time:22.600000
+average speed up:9.194149
+average intersection number:1.400000
+average intersection ratio:0.093333
+average query ratio:0.084485
+average precision:0.093333
+
+n = 100000, dim = 1000, L = 30, m = 2 ,nh = 100, k = 15;
+query次数：10
+construct time:13447
+average query points:12780.100000
+average lsh query time:29.900000
+average speed up:6.192456
+average intersection number:1.800000
+average intersection ratio:0.120000
+average query ratio:0.127801
+average precision:0.120000

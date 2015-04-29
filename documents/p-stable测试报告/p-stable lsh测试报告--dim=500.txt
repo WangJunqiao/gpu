@@ -1,0 +1,43 @@
+n = 100000, dim = 500, L = 10, m = 1 ,nh = 100, k = 15;
+query次数：10
+结果：
+construct time:1375
+average query points:69637.000000
+average time:124.500000
+average speed up:0.902088
+average intersection number:10.500000
+average intersection ratio:0.700000
+
+n = 100000, dim = 500, L = 10, m = 2 ,nh = 100, k = 15;
+query次数：10
+结果：
+construct time:2614
+average query points:8925
+average time:14
+average speed up:7.728560
+average intersection number:2
+average intersection ratio:0.153333
+
+
+n = 100000, dim = 500, L = 10, m = 3 ,nh = 100, k = 15;
+query次数：10
+结果：
+construct time:3564
+average query points:2437.300000
+average time:4.300000
+average speed up:31.192024
+average intersection number:0.600000
+average intersection ratio:0.040000
+
+n = 100000, dim = 500, L = 10, m = 4 ,nh = 100, k = 15;
+query次数：10
+结果：
+construct time:4020
+average query points:96.600000
+average time:0.700000
+average speed up:1.#INF00
+average intersection number:0.000000
+average intersection ratio:0.000000
+
+
+
