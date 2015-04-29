@@ -16,6 +16,7 @@ struct Data {
     int block, thread, method;
     double cpu_t, gpu_t;
 
+
     bool operator<(const Data &d) const {
         if (type != d.type) {
             return type < d.type;
@@ -37,8 +38,8 @@ struct Data {
 };
 
 void getTime(char *file_name, Data *data) {
-    static char buf[5555];       
-    FILE *fp = fopen(file_name, "r");
+    static char buf[5555];
+	FILE *fp = fopen(file_name, "r");
             while (fgets(buf, 5555, fp)) {
                 if (strstr(buf, "speed up")) {
                     puts(buf);
@@ -61,7 +62,7 @@ void getTime(char *file_name, Data *data) {
 typedef pair<int, int> PII;
 
 int main() {
-    char ddd[555] = "/mnt/sdb1/dd/gpu/data/docdup-out/";
+    char ddd[555] = "./data/docdup-out/";
     DIR *dir = opendir(ddd);
     dirent *file;
     Data data[5555];
@@ -106,9 +107,14 @@ int main() {
                     continue;
                 }
                 printf("%d, method = %d\n", data[i].doc_num, j);
+				double mi = 1e9;
                 for (map<PII, double>::iterator it = mp[j].begin(); it != mp[j].end(); ++ it) {
                     printf("{%d, %d, %lf},\n", it->first.first, it->first.second, it->second);
-                }
+                	if (it->second < mi) {
+						mi = it->second;
+					}
+				}
+				printf("mi = %lf\n", mi);
             }
         }
     }
