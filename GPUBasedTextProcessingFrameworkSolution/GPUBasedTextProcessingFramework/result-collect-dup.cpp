@@ -90,15 +90,26 @@ int main() {
             printf("cpu %6d %lfs\n", data[i].doc_num, data[i].cpu_t);
         } else {
             map<PII, double> mp[5];
-            int j;
+			map<int, double> mm[5];
+            map<int, int> cnt[5];
+			int j;
             for (j = i; j < d_cnt && data[j].doc_num == data[i].doc_num; ++ j) {
                 PII p(data[j].block, data[j].thread);
                 int m = data[j].method;
+				int mul = p.first * p.second;
                 if (mp[m].find(p) == mp[m].end()) {
                     mp[m][p] = data[j].gpu_t;
                 } else {
                     mp[m][p] = min(data[j].gpu_t, mp[m][p]);
                 }
+				mm[m][mul] += data[j].gpu_t;
+				cnt[m][mul] ++;
+				/*
+				if (mm[m].find(mul) == mm[m].end()) {
+					mm[m][mul] = data[j].gpu_t;
+				} else {
+					mm[m][mul] = min(data[j].gpu_t, mm[m][mul]);
+				} */
             }
             //printf("gpu %6d, (%3d, %3d, %8d), %lfs\n", data[i].doc_num, data[i].block, data[i].thread, data[i].method, data[i].gpu_t);
             i = j - 1;
@@ -113,6 +124,9 @@ int main() {
                 	if (it->second < mi) {
 						mi = it->second;
 					}
+				}
+				for (map<int ,double>::iterator it = mm[j].begin(); it != mm[j].end(); ++ it) {
+					printf("{%d, %lf},\n", it->first / cnt[j][it->first], it->second);
 				}
 				printf("mi = %lf\n", mi);
             }

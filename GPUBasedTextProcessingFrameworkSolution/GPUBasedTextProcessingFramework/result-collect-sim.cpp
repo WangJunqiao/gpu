@@ -67,7 +67,7 @@ void getTime(char *file_name, Data *data) {
 }
 
 int main() {
-    char ddd[555] = "/mnt/sdb1/dd/gpu/data/wordsim-out/";
+    char ddd[555] = "./data/wordsim-out/";
     DIR *dir = opendir(ddd);
     dirent *file;
     Data data[5555];

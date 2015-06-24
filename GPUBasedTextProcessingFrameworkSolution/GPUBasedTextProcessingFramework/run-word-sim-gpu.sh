@@ -1,8 +1,8 @@
 #!/bin/bash
 
-root_dir="/mnt/sdb1/dd/gpu/data/wordsim-out"
+root_dir="./data/wordsim-out"
 
-common_cmd="./GPU-exe -word_sim -win_size 5 -corpus /mnt/sdb1/dd/gpu/data/wiki_plain_txt -max_doc 20000000 -root_dir ${root_dir} "
+common_cmd="./GPU-exe -word_sim -win_size 5 -corpus ./data/wiki_plain_txt -max_doc 20000000 -root_dir ${root_dir} "
 
 
 

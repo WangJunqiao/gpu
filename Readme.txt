@@ -1,0 +1,3 @@
+document文件夹下面是课题研究过程中写的一些文档。
+DataCrawler是一个java项目，用来抓取codeforce上面的代码文件，用来做文档重复检测试验。单词相似度计算的实验数据直接从http://dumps.wikimedia.org/enwiki/latest/下载即可。
+GPUBasedTextProcessingFrameworkSolution是CUDA项目，在linux环境下用make命令编译，具体使用参见项目中的Readme文件。
